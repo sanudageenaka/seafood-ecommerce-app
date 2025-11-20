@@ -1,0 +1,106 @@
+# =========================================================
+# Node.js (Backend)
+# =========================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment variables (important for MySQL credentials)
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# Build outputs
+dist/
+build/
+out/
+.tmp/
+.cache/
+server/logs/
+
+# TypeScript (if used)
+*.tsbuildinfo
+
+# =========================================================
+# React.js (Frontend)
+# =========================================================
+# Node modules inside client
+client/node_modules/
+
+# React build output
+client/build/
+client/dist/
+
+# React cache
+client/.cache/
+client/.next/
+client/.eslintcache
+
+# Local dev environment files
+client/.env
+client/.env.local
+
+# =========================================================
+# MySQL
+# =========================================================
+
+# SQL dumps and auto exports
+*.sql
+*.sql.gz
+*.dump
+
+# MySQL config (if stored locally)
+mysql.conf
+my.cnf
+database/data/
+database/backups/
+database/*.log
+
+# =========================================================
+# Logs
+# =========================================================
+*.log
+*.log.*
+logs/
+server.log
+
+# =========================================================
+# OS & Editor files
+# =========================================================
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# VSCode / JetBrains
+.vscode/
+.idea/
+
+# Editor swap/backup files
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# =========================================================
+# Docker
+# =========================================================
+docker-compose.override.yml
+docker-data/
+docker/*/data/
+
+# =========================================================
+# Misc
+# =========================================================
+# Local history / backups
+*.orig
+*.rej
+
+# Production environment folders
+.env.production.local

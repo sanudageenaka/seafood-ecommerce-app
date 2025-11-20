@@ -1,2 +1,90 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# ---------------------------------------------------------
+# Core Settings
+# ---------------------------------------------------------
+
+# Ensure consistent LF line endings across all platforms
+* text=auto eol=lf
+
+# ---------------------------------------------------------
+# JavaScript / TypeScript / Web Files
+# ---------------------------------------------------------
+*.js   text
+*.jsx  text
+*.ts   text
+*.tsx  text
+*.json text
+*.css  text
+*.scss text
+*.html text
+*.md   text
+*.yml  text
+*.yaml text
+
+# Ensure consistent behavior for package-lock.json (must not normalize)
+package-lock.json -text
+
+# ---------------------------------------------------------
+# Ignore diff for generated or compiled files
+# ---------------------------------------------------------
+
+# Minified JS/CSS
+*.min.js  -diff
+*.min.css -diff
+
+# React build output
+build/*  -diff
+dist/*   -diff
+.out/*   -diff
+
+# Fonts
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+
+# Images
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.svg  text
+*.ico  binary
+*.webp binary
+
+# Audio / Video
+*.mp3 binary
+*.mp4 binary
+*.wav binary
+*.mov binary
+
+# ---------------------------------------------------------
+# OS / Editor Metadata
+# ---------------------------------------------------------
+
+# macOS
+*.DS_Store -diff
+
+# Windows thumbnails
+Thumbs.db -diff
+
+# VSCode
+.vscode/* text
+
+# JetBrains
+.idea/* -diff
+
+# ---------------------------------------------------------
+# Git merge settings
+# ---------------------------------------------------------
+
+# Use union merge for package.json to reduce merge conflicts
+package.json merge=union
+
+# Custom merge driver for lockfile (optional)
+# Uncomment if you configure it in .git/config
+# package-lock.json merge=lockfile
+
+# ---------------------------------------------------------
+# Keep attributes directory consistent
+# ---------------------------------------------------------
+.gitattributes text
