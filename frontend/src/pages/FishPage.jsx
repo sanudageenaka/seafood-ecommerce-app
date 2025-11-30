@@ -24,7 +24,7 @@ L.Icon.Default.mergeOptions({
 
 // Products
 const products = [
-  { id: 1, name: "Decapterus russelli", localName: "LINNA", price: 120, image: "public/seafoods/fish14.jpg" },
+  { id: 1, name: "Decapterus russelli", localName: "LINNA", price: 120, image: "/seafoods/fish14.jpg" },
   { id: 2, name: "Istiophorus Platypterus", localName: "THALAPATH", price: 90, image: "public/seafoods/fish15.jpg" },
   { id: 3, name: "Skipjack Tuna", localName: "BALAYA", price: 75, image: "public/seafoods/fish16.jpg" },
   { id: 4, name: "Narrow-barred Spanish mackerel", localName: "THORA", price: 45, image: "public/seafoods/fish17.jpg" },
