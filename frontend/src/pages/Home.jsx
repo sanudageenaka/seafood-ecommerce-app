@@ -199,7 +199,15 @@ export default function Home() {
           <div>
             <h3 className="text-lg font-semibold mb-4">My Account</h3>
             <ul className="space-y-2 text-gray-300">
-              <li>Sign In / Register</li>
+              <li>
+                <Link
+                  to="/login"
+                  className="hover:text-white transition"
+                >
+                  Sign in/Register
+                </Link>
+              </li>
+              
             </ul>
           </div>
         </div>
