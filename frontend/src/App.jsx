@@ -13,6 +13,7 @@ import ScrollToTop from './components/ScrollToTop.jsx'
 import PaymentPage from './pages/PaymentPage.jsx'
 import CheckoutPage from './pages/CheckoutPage.jsx'
 import TermsAndConditions from './pages/TermsAndConditions.jsx'
+import PrivacyPolicy from './pages/PrivacyPolicy.jsx'
 
 
 export default function App() {
@@ -34,6 +35,7 @@ export default function App() {
           <Route path="/payment" element={<PaymentPage />} />
           <Route path="/checkoutpage" element={<CheckoutPage />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
        
            
         </Routes>

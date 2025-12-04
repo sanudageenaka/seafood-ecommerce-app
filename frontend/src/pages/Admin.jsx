@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import api from '../api'
+import api from '../services/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
 
 export default function Admin() {

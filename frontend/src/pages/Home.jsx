@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import api from "../api";
+import api from '../services/api'
 import ProductCard from "../components/ProductCard.jsx";
 
 export default function Home() {
@@ -175,10 +175,25 @@ export default function Home() {
 
           <div>
             <h3 className="text-lg font-semibold mb-4">Policy</h3>
-            <ul className="space-y-2 text-gray-300">
-              <li>Terms & Conditions</li>
-              <li>Privacy Policy</li>
-            </ul>
+           <ul className="space-y-2 text-gray-300">
+  <li>
+    <Link
+      to="/terms-and-conditions"
+      className="hover:text-white transition"
+    >
+      Terms & Conditions
+    </Link>
+  </li>
+
+  <li>
+    <Link
+      to="/privacy-policy"
+      className="hover:text-white transition"
+    >
+      Privacy Policy
+    </Link>
+  </li>
+</ul>
           </div>
 
           <div>
