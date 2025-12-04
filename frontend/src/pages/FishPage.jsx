@@ -82,11 +82,11 @@ export default function Shop() {
     if (kg <= 0) return alert("Enter a valid kg.");
     add(product, kg);
 
-     // CLEAR INPUT FIELD AFTER ADDING
-  setKgInputs((prev) => ({ 
-    ...prev, 
-    [product.id]: "" 
-  }));
+    // CLEAR INPUT FIELD AFTER ADDING
+    setKgInputs((prev) => ({
+      ...prev,
+      [product.id]: ""
+    }));
   };
 
   // Fetch address using reverse geocoding
@@ -136,10 +136,10 @@ export default function Shop() {
     alert(
       `Order Summary:
 Total Weight: ${totalKg}kg
-Items Price: $${total}
-Delivery Fee: $${deliveryFee}
+Items Price: LKR ${total}
+Delivery Fee: LKR ${deliveryFee}
 Address: ${address}
-Final Total: $${finalTotal}`
+Final Total: LKR ${finalTotal}`
     );
 
     navigate("/checkoutpage");
@@ -157,12 +157,19 @@ Final Total: $${finalTotal}`
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {products.map((p) => (
             <div key={p.id} className="border rounded-xl p-4 shadow bg-white">
-              <img src={p.image} className="w-32 h-32 object-cover mb-3 rounded-lg" />
+              
+            <img
+              src={p.image}
+             className="w-32 h-32 object-cover mb-3 rounded-lg mx-auto"
+            />
 
-              <h2 className="font-semibold">{p.name}</h2>
-              <p className="text-sm italic text-gray-600">{p.localName}</p>
-              <p className="font-medium text-gray-700">${p.price}</p>
+          <h2 className="font-semibold text-center">{p.name}</h2>
+          <p className="text-sm italic text-gray-600 text-center">{p.localName}</p>
 
+  {/* PRICE PER 1KG */}
+  <p className="text-center font-bold text-green-700 mt-1">
+    LKR {p.price} / 1kg
+  </p>
               <input
                 type="number"
                 min="0"
@@ -171,10 +178,10 @@ Final Total: $${finalTotal}`
                 value={kgInputs[p.id] || ""}
                 onChange={(e) => handleKgChange(p.id, e.target.value)}
                 onKeyDown={(e) => {
-                if (["e", "E", "+", "-"].includes(e.key)) {
-                e.preventDefault();
-    }
-  }}
+                  if (["e", "E", "+", "-"].includes(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
               />
 
               <button
@@ -203,7 +210,7 @@ Final Total: $${finalTotal}`
                   <div>
                     <p>{item.name}</p>
                     <p className="text-sm text-gray-500">
-                      {item.qty}kg × ${item.price}
+                      {item.qty}kg × LKR {item.price}
                     </p>
                   </div>
                   <button
@@ -219,9 +226,9 @@ Final Total: $${finalTotal}`
 
           <div className="mt-4 border-t pt-3 space-y-1 text-sm">
             <p>Total Weight: {totalKg}kg</p>
-            <p>Items Price: LKR{total}</p>
-            <p>Delivery Fee: {totalKg === 0 ? "-" : deliveryFee === 0 ? "FREE" : `$${deliveryFee}`}</p>
-            <p>Total: LKR{totalKg === 0 ? 0 : total + deliveryFee}</p>
+            <p>Items Price: LKR {total}</p>
+            <p>Delivery Fee: {totalKg === 0 ? "-" : deliveryFee === 0 ? "FREE" : `LKR ${deliveryFee}`}</p>
+            <p>Total: LKR {totalKg === 0 ? 0 : total + deliveryFee}</p>
 
             <button
               onClick={handleBuy}
