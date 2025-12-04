@@ -219,9 +219,9 @@ Final Total: $${finalTotal}`
 
           <div className="mt-4 border-t pt-3 space-y-1 text-sm">
             <p>Total Weight: {totalKg}kg</p>
-            <p>Items Price: ${total}</p>
+            <p>Items Price: LKR{total}</p>
             <p>Delivery Fee: {totalKg === 0 ? "-" : deliveryFee === 0 ? "FREE" : `$${deliveryFee}`}</p>
-            <p>Total: ${totalKg === 0 ? 0 : total + deliveryFee}</p>
+            <p>Total: LKR{totalKg === 0 ? 0 : total + deliveryFee}</p>
 
             <button
               onClick={handleBuy}
