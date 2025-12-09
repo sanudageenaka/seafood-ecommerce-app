@@ -14,6 +14,7 @@ import PaymentPage from './pages/PaymentPage.jsx'
 import CheckoutPage from './pages/CheckoutPage.jsx'
 import TermsAndConditions from './pages/TermsAndConditions.jsx'
 import PrivacyPolicy from './pages/PrivacyPolicy.jsx'
+import About from './pages/About.jsx'
 
 
 export default function App() {
@@ -36,7 +37,7 @@ export default function App() {
           <Route path="/checkoutpage" element={<CheckoutPage />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-       
+          <Route path="/about" element={<About />} />
            
         </Routes>
       </main>
