@@ -37,7 +37,12 @@ export default function Home() {
       <div className="max-w-6xl mx-auto px-4 py-8">
 
         {/* Sliding Image Section */}
-        <section className="relative overflow-hidden w-full bg-gradient-to-r from-blue-50 to-blue-100 py-10 rounded-xl shadow-inner">
+        <section className="
+  relative overflow-hidden w-full py-14 rounded-2xl
+  bg-[radial-gradient(900px_ellipse_at_top,_#e0f2fe_0%,_#f7fbff_42%,_#eef6ff_100%)]
+  border border-white/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.6),_0_8px_24px_rgba(15,23,42,0.08)]
+">
+
           <div className="flex animate-scroll gap-8">
             {["fish1.jpg", "fish2.jpg", "fish3.jpg", "fish4.jpg", "fish5.jpg"].map(
               (img, index) => (
