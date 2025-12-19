@@ -167,7 +167,15 @@ export default function Home() {
           <div>
             <h3 className="text-lg font-semibold mb-4">About</h3>
             <ul className="space-y-2 text-gray-300">
-              <li>About Us</li>
+              
+                <li>
+    <Link
+      to="/about"
+      className="hover:text-white transition"
+    >
+      About Us
+    </Link>
+  </li>
               <li>Feedback</li>
               <li>Hotline</li>
             </ul>
