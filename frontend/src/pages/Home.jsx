@@ -100,21 +100,21 @@ export default function Home() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {[
                 {
-                  name: "Sarah Johnson",
+                  name: "Ruvindu Geethisha",
                   image: "/users/user1.jpg",
                   review:
                     "Absolutely love the freshness! The fish arrived on time and tasted incredible. Highly recommend this service!",
                   rating: 5,
                 },
                 {
-                  name: "Michael Lee",
+                  name: "Sanidi Uthsari",
                   image: "/users/user2.jpg",
                   review:
                     "Best seafood delivery I've tried. The prawns were juicy and perfectly packed. Will definitely order again!",
-                  rating: 4,
+                  rating: 5,
                 },
                 {
-                  name: "Priya Patel",
+                  name: "Upul Geethapriya",
                   image: "/users/user3.jpg",
                   review:
                     "Great quality and variety. The smoked salmon was delicious and the customer service was top-notch.",
