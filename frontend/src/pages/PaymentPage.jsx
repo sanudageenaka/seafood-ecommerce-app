@@ -6,41 +6,56 @@ export default function PaymentPage() {
   const { items, total, clear } = useCart()
   const navigate = useNavigate()
 
-  // Redirect if no items in cart
+  // Redirect if cart is empty
   useEffect(() => {
-    if (items.length === 0) {
-      navigate('/payment')
-    }
+    if (items.length === 0) navigate('/fish')
   }, [items, navigate])
+
+  // ✅ Hard lock body scroll on this page
+  useEffect(() => {
+    const prevHtml = document.documentElement.style.overflow
+    const prevBody = document.body.style.overflow
+    document.documentElement.style.overflow = 'hidden'
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.documentElement.style.overflow = prevHtml
+      document.body.style.overflow = prevBody
+    }
+  }, [])
+
+  const formatLKR = (amount) =>
+    `Rs. ${Number(amount).toLocaleString('en-LK', { minimumFractionDigits: 2 })}`
 
   const handleConfirmPayment = () => {
     alert('✅ Payment successful! Thank you for your order.')
     clear()
-    navigate('/') // Back to homepage
+    navigate('/')
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-6">
-      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-md">
+    // ✅ Covers the screen fully (even if App has other content)
+    <div className="fixed inset-0 bg-gray-50 flex items-center justify-center px-6">
+      <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-md">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          💳 Payment Gateway
+          💳 Payment
         </h1>
 
         <h2 className="text-lg font-semibold mb-4 text-gray-700">
           Order Summary
         </h2>
 
-        <ul className="divide-y divide-gray-200 mb-4">
+        {/* ✅ If there are many items, scroll only inside this box */}
+        <div className="max-h-56 overflow-auto divide-y divide-gray-200 mb-4">
           {items.map((item) => (
-            <li key={item.id} className="py-3 flex justify-between">
+            <div key={item.id} className="py-3 flex justify-between text-sm">
               <span>{item.name} × {item.qty}</span>
-              <span>${item.price * item.qty}</span>
-            </li>
+              <span className="font-medium">{formatLKR(item.price * item.qty)}</span>
+            </div>
           ))}
-        </ul>
+        </div>
 
-        <p className="text-right font-bold text-lg mb-6">
-          Total: ${total}
+        <p className="text-right font-bold text-lg mb-6 text-gray-800">
+          Total: {formatLKR(total)}
         </p>
 
         <button

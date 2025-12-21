@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar.jsx'
 import Footer from './components/Footer.jsx'
 import Home from './pages/Home.jsx'
@@ -16,14 +16,17 @@ import TermsAndConditions from './pages/TermsAndConditions.jsx'
 import PrivacyPolicy from './pages/PrivacyPolicy.jsx'
 import About from './pages/About.jsx'
 
+function Layout() {
+  const location = useLocation()
+  const isPayment = location.pathname === '/payment'
 
-export default function App() {
   return (
     <div className="min-h-screen flex flex-col">
-       <ScrollToTop /> 
-       
-      <Navbar />
-      <main className="flex-1">
+      <ScrollToTop />
+
+      {!isPayment && <Navbar />}
+
+      <main className="flex-1 min-h-0">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/product/:id" element={<Product />} />
@@ -38,11 +41,14 @@ export default function App() {
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/about" element={<About />} />
-           
         </Routes>
       </main>
-     
-      <Footer />
+
+      {!isPayment && <Footer />}
     </div>
   )
+}
+
+export default function App() {
+  return <Layout />
 }
