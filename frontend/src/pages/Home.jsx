@@ -101,14 +101,14 @@ export default function Home() {
               {[
                 {
                   name: "Ruvindu Geethisha",
-                  image: "/users/user1.jpg",
+                  image: "/users/person1.jpg",
                   review:
                     "Absolutely love the freshness! The fish arrived on time and tasted incredible. Highly recommend this service!",
                   rating: 5,
                 },
                 {
                   name: "Sanidi Uthsari",
-                  image: "/users/user2.jpg",
+                  image: "/users/person2.jpg",
                   review:
                     "Best seafood delivery I've tried. The prawns were juicy and perfectly packed. Will definitely order again!",
                   rating: 5,
