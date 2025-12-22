@@ -162,10 +162,30 @@ export default function Home() {
             <h3 className="text-lg font-semibold mb-4">Order Now</h3>
             <ul className="space-y-2 text-gray-300">
               <li>Deals</li>
-              <li>Pizzas</li>
-              <li>Seafood</li>
-              <li>Sushi</li>
-              <li>Frozen Items</li>
+              <li> <Link
+      to="/fish"
+      className="hover:text-white transition"
+    >
+      Free Fish
+    </Link></li>
+              <li><Link
+      to="/crabs"
+      className="hover:text-white transition"
+    >
+      Crabs
+    </Link></li>
+              <li><Link
+      to="/prawns"
+      className="hover:text-white transition"
+    >
+      Prawns
+    </Link></li>
+              <li><Link
+      to="/lobsters"
+      className="hover:text-white transition"
+    >
+      Lobsters
+    </Link></li>
             </ul>
           </div>
 
