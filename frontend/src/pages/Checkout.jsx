@@ -2,12 +2,12 @@ import { useCart } from '../context/CartContext.jsx'
 import { useNavigate } from 'react-router-dom'
 
 export default function Checkout() {
-  const { items, total, remove, clear } = useCart()
+  const { items, total, remove, clear, formatLKR } = useCart()
   const navigate = useNavigate()
 
   const handlePlaceOrder = () => {
-    clear()                 // clear cart
-    navigate('/checkoutpage')  // navigate to your next page
+    clear()                   // clear cart
+    navigate('/checkoutpage') // go to next page
   }
 
   return (
@@ -32,7 +32,10 @@ export default function Checkout() {
                   <p className="text-gray-500 text-sm">Qty: {it.qty}</p>
                 </div>
 
-                <p className="font-bold">${(it.price * it.qty).toFixed(2)}</p>
+                {/* ✅ LKR price */}
+                <p className="font-bold">
+                  {formatLKR(it.price * it.qty)}
+                </p>
 
                 <button
                   onClick={() => remove(it.id)}
@@ -45,7 +48,11 @@ export default function Checkout() {
           </ul>
 
           <div className="flex items-center justify-between pt-4">
-            <p className="text-lg font-bold">Total: ${total.toFixed(2)}</p>
+            {/* ✅ LKR total */}
+            <p className="text-lg font-bold">
+              Total: {formatLKR(total)}
+            </p>
+
             <button
               onClick={handlePlaceOrder}
               className="px-5 py-2 rounded-xl bg-blue-600 text-white hover:opacity-90"
