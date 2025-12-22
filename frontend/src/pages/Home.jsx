@@ -201,7 +201,12 @@ export default function Home() {
       About Us
     </Link>
   </li>
-              <li>Feedback</li>
+              <li><Link
+      to="/feedback"
+      className="hover:text-white transition"
+    >
+      Feedback
+    </Link></li>
               <li>Hotline</li>
             </ul>
           </div>

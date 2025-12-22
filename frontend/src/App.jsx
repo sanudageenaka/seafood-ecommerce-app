@@ -15,6 +15,8 @@ import CheckoutPage from './pages/CheckoutPage.jsx'
 import TermsAndConditions from './pages/TermsAndConditions.jsx'
 import PrivacyPolicy from './pages/PrivacyPolicy.jsx'
 import About from './pages/About.jsx'
+import Feedback from './pages/FeedbackForm.jsx'       
+
 
 function Layout() {
   const location = useLocation()
@@ -41,6 +43,7 @@ function Layout() {
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/about" element={<About />} />
+          <Route path="/feedback" element={<Feedback />} />
         </Routes>
       </main>
 
