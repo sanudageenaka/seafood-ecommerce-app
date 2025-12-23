@@ -16,7 +16,8 @@ import TermsAndConditions from './pages/TermsAndConditions.jsx'
 import PrivacyPolicy from './pages/PrivacyPolicy.jsx'
 import About from './pages/About.jsx'
 import Feedback from './pages/FeedbackForm.jsx'       
-
+import Hotline from './pages/Hotline.jsx'
+import DeliveryLocation from "./pages/DeliveryLocation.jsx";
 
 function Layout() {
   const location = useLocation()
@@ -44,6 +45,8 @@ function Layout() {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/about" element={<About />} />
           <Route path="/feedback" element={<Feedback />} />
+          <Route path="/hotline" element={<Hotline />} />
+          <Route path="/delivery-location" element={<DeliveryLocation />} />
         </Routes>
       </main>
 

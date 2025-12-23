@@ -207,7 +207,12 @@ export default function Home() {
     >
       Feedback
     </Link></li>
-              <li>Hotline</li>
+              <li>  <Link
+      to="/hotline"
+      className="hover:text-white transition"
+    >
+      Hotline
+    </Link></li>
             </ul>
           </div>
 

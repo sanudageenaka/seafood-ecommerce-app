@@ -1,14 +1,14 @@
-import { useCart } from '../context/CartContext.jsx'
-import { useNavigate } from 'react-router-dom'
+import { useCart } from "../context/CartContext.jsx";
+import { useNavigate } from "react-router-dom";
 
 export default function Checkout() {
-  const { items, total, remove, clear, formatLKR } = useCart()
-  const navigate = useNavigate()
+  const { items, total, remove, formatLKR } = useCart();
+  const navigate = useNavigate();
 
   const handlePlaceOrder = () => {
-    clear()                   // clear cart
-    navigate('/checkoutpage') // go to next page
-  }
+    // ✅ don't clear here
+    navigate("/delivery-location"); // OR "/delivery-location" depending your flow
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10">
@@ -32,10 +32,7 @@ export default function Checkout() {
                   <p className="text-gray-500 text-sm">Qty: {it.qty}</p>
                 </div>
 
-                {/* ✅ LKR price */}
-                <p className="font-bold">
-                  {formatLKR(it.price * it.qty)}
-                </p>
+                <p className="font-bold">{formatLKR(it.price * it.qty)}</p>
 
                 <button
                   onClick={() => remove(it.id)}
@@ -48,10 +45,7 @@ export default function Checkout() {
           </ul>
 
           <div className="flex items-center justify-between pt-4">
-            {/* ✅ LKR total */}
-            <p className="text-lg font-bold">
-              Total: {formatLKR(total)}
-            </p>
+            <p className="text-lg font-bold">Total: {formatLKR(total)}</p>
 
             <button
               onClick={handlePlaceOrder}
@@ -63,5 +57,5 @@ export default function Checkout() {
         </div>
       )}
     </div>
-  )
+  );
 }

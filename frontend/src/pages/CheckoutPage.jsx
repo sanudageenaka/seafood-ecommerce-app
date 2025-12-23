@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function CheckoutPage() {
-  const { items, total, clear } = useCart();
+  const { items, total, clear, formatLKR } = useCart();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -163,7 +163,7 @@ export default function CheckoutPage() {
             onClick={handlePlaceOrder}
             className="mt-6 w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition"
           >
-            Place Your Order Rs.{total}
+            Place Your Order {formatLKR(total)}
           </button>
         </div>
 
@@ -179,13 +179,13 @@ export default function CheckoutPage() {
                 <span>
                   {item.name} × {item.qty}
                 </span>
-                <span>Rs.{item.price * item.qty}</span>
+                <span>{formatLKR(item.price * item.qty)}</span>
               </li>
             ))}
           </ul>
 
           <p className="text-right font-bold text-lg mb-4">
-            Total : Rs.{total}
+            Total : {formatLKR(total)}
           </p>
 
           <p className="text-sm text-gray-500">
