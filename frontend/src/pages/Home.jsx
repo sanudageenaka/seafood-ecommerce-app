@@ -107,15 +107,15 @@ export default function Home() {
                   rating: 5,
                 },
                 {
-                  name: "Sanidi Uthsari",
-                  image: "/users/person2.jpg",
+                  name: "Tilmi Thishara",
+                  image: "/users/person3.jpg",
                   review:
-                    "Best seafood delivery I've tried. The prawns were juicy and perfectly packed. Will definitely order again!",
+                    "Best seafood delivery I've tried. The prawns and crabs were perfectly packed. Will definitely order again!",
                   rating: 5,
                 },
                 {
-                  name: "Upul Geethapriya",
-                  image: "/users/user3.jpg",
+                  name: "Sanidi Uthsari",
+                  image: "/users/person2.jpg",
                   review:
                     "Great quality and variety. The smoked salmon was delicious and the customer service was top-notch.",
                   rating: 5,
