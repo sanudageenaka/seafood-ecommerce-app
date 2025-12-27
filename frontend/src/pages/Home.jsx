@@ -69,8 +69,8 @@ export default function Home() {
               { name: "Crabs", image: "/seafoods/fish7.jpg", path: "/crabs" },
               { name: "Prawns", image: "/seafoods/fish8.jpg", path: "/prawns" },
               { name: "Lobsters", image: "/seafoods/fish9.jpg", path: "/lobsters" },
-              { name: "Shellfish", image: "/seafoods/fish10.jpg", path: "/shellfish" },
-              { name: "Frozen Items", image: "/seafoods/fish11.jpg", path: "/frozen" },
+              { name: "Shellfish", image: "/seafoods/fish10.jpg", path: "/cuttlefish" },
+              { name: "Frozen Items", image: "/seafoods/fish11.jpg", path: "/driedfish" },
               { name: "Smoked Seafood", image: "/seafoods/fish12.jpg", path: "/smoked" },
               { name: "Caviar", image: "/seafoods/fish13.jpg", path: "/caviar" },
             ].map((cat, index) => (

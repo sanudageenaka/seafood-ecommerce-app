@@ -9,6 +9,11 @@ import Checkout from './pages/Checkout.jsx'
 import Admin from './pages/Admin.jsx'
 import Shop from './pages/Shop.jsx'
 import FishPage from './pages/FishPage.jsx'
+import CrabsPage from './pages/CrabsPage.jsx'
+import PrawnsPage from './pages/PrawnsPage.jsx'
+import LobstersPage from './pages/LobstersPage.jsx'
+import CuttleFishPage from './pages/CuttleFishPage.jsx'
+import DriedFishPage from './pages/DriedFishPage.jsx'
 import ScrollToTop from './components/ScrollToTop.jsx'
 import PaymentPage from './pages/PaymentPage.jsx'
 import CheckoutPage from './pages/CheckoutPage.jsx'
@@ -17,7 +22,9 @@ import PrivacyPolicy from './pages/PrivacyPolicy.jsx'
 import About from './pages/About.jsx'
 import Feedback from './pages/FeedbackForm.jsx'       
 import Hotline from './pages/Hotline.jsx'
-import DeliveryLocation from "./pages/DeliveryLocation.jsx";
+import DeliveryLocation from "./pages/DeliveryLocation.jsx"
+
+
 
 function Layout() {
   const location = useLocation()
@@ -39,6 +46,11 @@ function Layout() {
           <Route path="/admin" element={<Admin />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/fish" element={<FishPage />} />
+          <Route path="/crabs" element={<CrabsPage />} />
+          <Route path="/prawns" element={<PrawnsPage />} />
+          <Route path="/lobsters" element={<LobstersPage />} />
+          <Route path="/cuttlefish" element={<CuttleFishPage />} />
+          <Route path="/driedfish" element={<DriedFishPage />} />
           <Route path="/payment" element={<PaymentPage />} />
           <Route path="/checkoutpage" element={<CheckoutPage />} />
           <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
