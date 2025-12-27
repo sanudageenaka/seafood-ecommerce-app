@@ -12,7 +12,7 @@ const products = [
   { id: 6, name: "Bigeye scad", localName: "BOLLA", price: 130, image: "/seafoods/fish19.jpg" },
 ];
 
-export default function Shop() {
+export default function FishPage() {
   const { items, add, remove, clear, total } = useCart();
   const navigate = useNavigate();
 
@@ -34,7 +34,7 @@ export default function Shop() {
   const handleBuy = () => {
     if (items.length === 0) return alert("Cart is empty!");
     if (totalKg < 10) return alert(`Minimum total order is 10kg. You have ${totalKg}kg.`);
-    navigate("/checkoutpage");
+    navigate("/delivery-location");
   };
 
   return (
