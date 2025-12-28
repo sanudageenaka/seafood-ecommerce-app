@@ -15,16 +15,23 @@ export default function Register() {
   const onSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
+
     try {
       await register(name, email, password)
-      toast.success('Registration successful! Redirecting to login...', {
-        position: 'top-right',
-        autoClose: 3000,
+
+      toast.success('Registration successful! Please log in to continue.', {
+        icon: '✅',
+        className: 'bg-green-50 border border-green-200',
       })
-      setTimeout(() => navigate('/login'), 3000)
+
+      // ✅ Redirect to login after toast
+      setTimeout(() => {
+        navigate('/login')
+      }, 3000)
     } catch (e) {
       toast.error(e?.response?.data?.error || 'Registration failed', {
-        position: 'top-right',
+        icon: '⚠️',
+        className: 'bg-red-50 border border-red-200',
       })
     } finally {
       setLoading(false)
@@ -33,11 +40,30 @@ export default function Register() {
 
   return (
     <div className="max-w-md mx-auto px-4 py-16">
-      <ToastContainer />
-      <h1 className="text-2xl font-bold">Create your account</h1>
-      <p className="text-gray-500 mb-6">Register to start managing your account.</p>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="light"
+        toastClassName={() =>
+          'flex items-center gap-3 rounded-xl px-4 py-3 shadow-lg text-sm'
+        }
+        bodyClassName={() => 'text-gray-800 font-medium'}
+        progressClassName={() => 'bg-blue-600'}
+      />
 
-      <form onSubmit={onSubmit} className="bg-white rounded-xl shadow-md p-5 space-y-3">
+      <h1 className="text-2xl font-bold">Create your account</h1>
+      <p className="text-gray-500 mb-6">
+        Register to start managing your account.
+      </p>
+
+      <form
+        onSubmit={onSubmit}
+        className="bg-white rounded-xl shadow-md p-5 space-y-3"
+      >
         <div>
           <label className="text-sm text-gray-600">Name</label>
           <input
@@ -48,6 +74,7 @@ export default function Register() {
             required
           />
         </div>
+
         <div>
           <label className="text-sm text-gray-600">Email</label>
           <input
@@ -58,6 +85,7 @@ export default function Register() {
             required
           />
         </div>
+
         <div>
           <label className="text-sm text-gray-600">Password</label>
           <input
@@ -72,7 +100,9 @@ export default function Register() {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full py-2 rounded-xl text-white ${loading ? 'bg-gray-500' : 'bg-gray-900'}`}
+          className={`w-full py-2 rounded-xl text-white ${
+            loading ? 'bg-gray-500' : 'bg-gray-900'
+          }`}
         >
           {loading ? 'Registering...' : 'Register'}
         </button>
