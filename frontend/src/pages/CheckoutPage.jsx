@@ -58,7 +58,7 @@ export default function CheckoutPage() {
             <h1 className="text-2xl md:text-3xl font-extrabold text-[#002B5B]">
               Checkout
             </h1>
-            <p className="text-sm text-[#475569] mt-1">
+            <p className="text-sm text-gray-600 mt-1">
               Complete your delivery details and payment method.
             </p>
           </div>
@@ -79,10 +79,10 @@ export default function CheckoutPage() {
           <div className="lg:col-span-3 bg-white rounded-2xl border shadow-sm p-6 md:p-8">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="text-xl font-bold text-[#002B5B]">
+                <h2 className="text-xl font-bold text-gray-900">
                   Delivery details
                 </h2>
-                <p className="text-sm text-[#475569] mt-1">
+                <p className="text-sm text-gray-600 mt-1">
                   Fields marked with * are required.
                 </p>
               </div>
@@ -96,14 +96,14 @@ export default function CheckoutPage() {
             <div className="mt-6 space-y-4">
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-[#0A3A66]">
+                  <label className="text-sm font-medium text-gray-700">
                     First name *
                   </label>
                   <input
                     name="firstName"
                     value={form.firstName}
+                    placeholder="First name"
                     onChange={handleChange}
-                    placeholder="Ruvindu"
                     className={`mt-1 w-full rounded-xl border px-4 py-3 focus:ring-2 focus:ring-blue-200 outline-none ${
                       errors.firstName ? "border-red-300" : "border-gray-200"
                     }`}
@@ -116,14 +116,14 @@ export default function CheckoutPage() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-[#0A3A66]">
+                  <label className="text-sm font-medium text-gray-700">
                     Last name
                   </label>
                   <input
                     name="lastName"
+                    placeholder="Last name"
                     value={form.lastName}
                     onChange={handleChange}
-                    placeholder="Sanuda"
                     className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 focus:ring-2 focus:ring-blue-200 outline-none"
                   />
                 </div>
@@ -131,47 +131,57 @@ export default function CheckoutPage() {
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-[#0A3A66]">
+                  <label className="text-sm font-medium text-gray-700">
                     Email
                   </label>
                   <input
                     name="email"
                     value={form.email}
+                    placeholder="mail@example.com"
                     onChange={handleChange}
-                    placeholder="you@example.com"
                     type="email"
                     className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 focus:ring-2 focus:ring-blue-200 outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-[#0A3A66]">
-                    Mobile number *
-                  </label>
-                  <input
-                    name="phone"
-                    value={form.phone}
-                    onChange={handleChange}
-                    placeholder="07X XXX XXXX"
-                    className={`mt-1 w-full rounded-xl border px-4 py-3 focus:ring-2 focus:ring-blue-200 outline-none ${
-                      errors.phone ? "border-red-300" : "border-gray-200"
-                    }`}
-                  />
-                  {errors.phone ? (
-                    <p className="mt-1 text-xs text-red-600">{errors.phone}</p>
-                  ) : null}
-                </div>
-              </div>
+  <label className="text-sm font-medium text-gray-700">
+    Mobile number *
+  </label>
 
+  <div className="mt-1 flex">
+    {/* Country Code */}
+    <div className="flex items-center rounded-l-xl border border-r-0 bg-gray-50 px-4 text-sm text-gray-600">
+      +94
+    </div>
+
+    {/* Mobile Number */}
+    <input
+      name="phone"
+      value={form.phone}
+      onChange={handleChange}
+      placeholder="7X XXX XXXX"
+      className={`w-full rounded-r-xl border px-4 py-3 focus:ring-2 focus:ring-blue-200 outline-none ${
+        errors.phone ? "border-red-300" : "border-gray-200"
+      }`}
+    />
+  </div>
+
+  {errors.phone ? (
+    <p className="mt-1 text-xs text-red-600">{errors.phone}</p>
+  ) : null}
+</div>
+
+</div>
               <div>
-                <label className="text-sm font-medium text-[#0A3A66]">
+                <label className="text-sm font-medium text-gray-700">
                   Delivery address *
                 </label>
                 <input
                   name="address"
                   value={form.address}
                   onChange={handleChange}
-                  placeholder="House no, street, landmark"
+                  placeholder="House No or Name"
                   className={`mt-1 w-full rounded-xl border px-4 py-3 focus:ring-2 focus:ring-blue-200 outline-none ${
                     errors.address ? "border-red-300" : "border-gray-200"
                   }`}
@@ -183,27 +193,27 @@ export default function CheckoutPage() {
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-[#0A3A66]">
-                    City / Town
+                  <label className="text-sm font-medium text-gray-700">
+                    City / Town *
                   </label>
                   <input
                     name="city"
+                    placeholder="City"
                     value={form.city}
                     onChange={handleChange}
-                    placeholder="Colombo"
                     className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 focus:ring-2 focus:ring-blue-200 outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-[#0A3A66]">
+                  <label className="text-sm font-medium text-gray-700">
                     Delivery note
                   </label>
                   <input
                     name="instructions"
+                    placeholder="E.g., Landmark, floor, etc."
                     value={form.instructions}
                     onChange={handleChange}
-                    placeholder="Gate code, landmark, call on arrival..."
                     className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 focus:ring-2 focus:ring-blue-200 outline-none"
                   />
                 </div>
@@ -211,10 +221,10 @@ export default function CheckoutPage() {
 
               {/* Payment */}
               <div className="pt-4 border-t">
-                <h3 className="text-lg font-bold text-[#002B5B]">
+                <h3 className="text-lg font-bold text-gray-900">
                   Payment method
                 </h3>
-                <p className="text-sm text-[#475569] mt-1">
+                <p className="text-sm text-gray-600 mt-1">
                   Choose how you’d like to pay.
                 </p>
 
@@ -236,10 +246,8 @@ export default function CheckoutPage() {
                         className="mt-1"
                       />
                       <div>
-                        <p className="font-semibold text-[#002B5B]">
-                          Pay online
-                        </p>
-                        <p className="text-sm text-[#475569] mt-1">
+                        <p className="font-semibold text-gray-900">Pay online</p>
+                        <p className="text-sm text-gray-600 mt-1">
                           Debit or credit card.
                         </p>
                       </div>
@@ -247,11 +255,11 @@ export default function CheckoutPage() {
 
                     {form.paymentMethod === "online" && (
                       <div className="mt-4 pl-7">
-                        <p className="text-sm font-medium text-[#0A3A66]">
+                        <p className="text-sm font-medium text-gray-700">
                           Card type
                         </p>
                         <div className="mt-2 flex flex-wrap gap-3">
-                          <label className="flex items-center gap-2 text-sm text-[#0A3A66]">
+                          <label className="flex items-center gap-2 text-sm text-gray-700">
                             <input
                               type="radio"
                               name="cardType"
@@ -261,7 +269,7 @@ export default function CheckoutPage() {
                             />
                             Debit
                           </label>
-                          <label className="flex items-center gap-2 text-sm text-[#0A3A66]">
+                          <label className="flex items-center gap-2 text-sm text-gray-700">
                             <input
                               type="radio"
                               name="cardType"
@@ -293,10 +301,10 @@ export default function CheckoutPage() {
                         className="mt-1"
                       />
                       <div>
-                        <p className="font-semibold text-[#002B5B]">
+                        <p className="font-semibold text-gray-900">
                           Pay on delivery
                         </p>
-                        <p className="text-sm text-[#475569] mt-1">
+                        <p className="text-sm text-gray-600 mt-1">
                           Cash or card at your doorstep.
                         </p>
                       </div>
@@ -314,7 +322,7 @@ export default function CheckoutPage() {
                 </button>
 
                 {!items.length ? (
-                  <p className="mt-2 text-sm text-[#64748B]">
+                  <p className="mt-2 text-sm text-gray-500">
                     Your cart is empty.
                   </p>
                 ) : null}
@@ -325,8 +333,8 @@ export default function CheckoutPage() {
           {/* Right: Summary */}
           <aside className="lg:col-span-2 bg-white rounded-2xl border shadow-sm p-6 md:p-8 h-fit">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-[#002B5B]">Order summary</h2>
-              <span className="text-xs font-semibold px-3 py-1 rounded-xl border bg-gray-50 text-[#475569]">
+              <h2 className="text-xl font-bold text-gray-900">Order summary</h2>
+              <span className="text-xs font-semibold px-3 py-1 rounded-xl border bg-gray-50 text-gray-700">
                 {items.length} item{items.length !== 1 ? "s" : ""}
               </span>
             </div>
@@ -338,14 +346,14 @@ export default function CheckoutPage() {
                   className="py-4 flex items-start justify-between gap-4"
                 >
                   <div className="min-w-0">
-                    <p className="font-semibold text-[#002B5B] truncate">
+                    <p className="font-semibold text-gray-900 truncate">
                       {item.name}
                     </p>
-                    <p className="text-sm text-[#475569] mt-1">
+                    <p className="text-sm text-gray-600 mt-1">
                       Qty: <span className="font-medium">{item.qty}</span>
                     </p>
                   </div>
-                  <p className="font-semibold text-[#0A3A66]">
+                  <p className="font-semibold text-gray-900">
                     {formatLKR(item.price * item.qty)}
                   </p>
                 </div>
@@ -353,31 +361,30 @@ export default function CheckoutPage() {
             </div>
 
             <div className="mt-6 space-y-2 border-t pt-4">
-              <div className="flex justify-between text-sm text-[#475569]">
+              <div className="flex justify-between text-sm text-gray-700">
                 <span>Subtotal</span>
-                <span className="font-medium text-[#0A3A66]">
-                  {formatLKR(total)}
-                </span>
+                <span className="font-medium">{formatLKR(total)}</span>
               </div>
 
-              <div className="flex justify-between text-sm text-[#475569]">
+              <div className="flex justify-between text-sm text-gray-700">
                 <span>Delivery</span>
-                <span className="font-medium text-[#0A3A66]">
+                <span className="font-medium">
                   {deliveryFee === 0 ? "Free" : formatLKR(deliveryFee)}
                 </span>
               </div>
 
-              <div className="flex justify-between text-base font-bold text-[#002B5B] pt-2">
+              <div className="flex justify-between text-base font-bold text-gray-900 pt-2">
                 <span>Total</span>
-                <span className="text-[#0A3A66]">{formatLKR(grandTotal)}</span>
+                <span>{formatLKR(grandTotal)}</span>
               </div>
             </div>
 
-            <div className="mt-6 rounded-2xl border bg-gray-50 p-4 text-sm text-[#475569]">
-              Estimated delivery:{" "}
-              <span className="font-medium text-[#0A3A66]">30–60 min</span>{" "}
-              within Colombo area.
-            </div>
+          <div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700">
+  Estimated delivery:{" "}
+  <span className="font-semibold text-blue-800">30–60 min</span>{" "}
+  within Colombo area.
+</div>
+
 
             <button
               type="button"
@@ -385,7 +392,7 @@ export default function CheckoutPage() {
                 clear();
                 navigate("/");
               }}
-              className="mt-4 w-full rounded-2xl border border-gray-200 py-3 font-semibold text-[#002B5B] hover:bg-gray-50 transition"
+              className="mt-4 w-full rounded-2xl border border-gray-200 py-3 font-semibold text-gray-800 hover:bg-gray-50 transition"
             >
               Clear cart
             </button>

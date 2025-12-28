@@ -290,18 +290,25 @@ export default function DeliveryLocationLeaflet() {
             <div className="p-4 border-b bg-gray-50 flex flex-col gap-3">
               <div className="flex justify-between items-start gap-3">
                 <div>
-                  <p className="font-semibold">Search & pick your location</p>
-                  <p className="text-sm text-gray-600">
-                    Type your street name, then click on the map to place the
-                    pin. You can re-click to adjust.
-                  </p>
+                  <p className="font-semibold text-[#002B5B]">
+  Search & pick your location
+</p>
+
+                <p className="text-xs text-gray-500 leading-relaxed">
+  Type your street name, then click on the map to place the
+  pin. You can re-click to adjust.
+</p>
+
                 </div>
 
                 <span
-                  className={`px-3 py-1 rounded-xl text-sm font-semibold border ${badge.cls}`}
-                >
-                  {badge.text}
-                </span>
+  className={`px-3 py-1 rounded-xl text-sm font-semibold border 
+  inline-flex items-center justify-center text-center
+  min-w-[190px] h-8 ${badge.cls}`}
+>
+  {badge.text}
+</span>
+
               </div>
 
               {/* Search (GPS only in dropdown ✅) */}
@@ -414,12 +421,12 @@ export default function DeliveryLocationLeaflet() {
             </div>
 
             <div className="p-4 border-t flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-            <p className="text-sm text-gray-600">
+            <p className="text-xs text-gray-500 leading-relaxed">
   {picked
     ? inside
       ? "Location selected within delivery area."
       : "Selected location is outside our delivery area."
-    : "Search an address or use 'My Current Location', then click the map"}
+    : "Search an address or use 'My Current Location', then click the map."}
 </p>
 
 
@@ -438,9 +445,10 @@ export default function DeliveryLocationLeaflet() {
             <h3 className="text-xl font-bold text-[#002B5B]">
               Delivery Address
             </h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Confirm your address details (house no, lane, landmark).
-            </p>
+            <p className="mt-2 text-xs text-gray-500 leading-relaxed">
+  Confirm your address details (house no, lane, landmark).
+</p>
+
 
             {/* ✅ Fixed-size textarea */}
             <textarea
@@ -451,9 +459,10 @@ export default function DeliveryLocationLeaflet() {
               placeholder="House no, street, landmark..."
             />
 
-            <div className="mt-4 rounded-xl border bg-white p-4 text-sm text-gray-600">
-              Delivery is available only inside the highlighted circle.
-            </div>
+            <p className="mt-4 text-xs text-gray-500 leading-relaxed">
+  Delivery is available only inside the highlighted circle.
+</p>
+
           </aside>
         </div>
       </main>
