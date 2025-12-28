@@ -71,7 +71,7 @@ export default function Home() {
               { name: "Lobsters", image: "/seafoods/fish9.jpg", path: "/lobsters" },
               { name: "Shellfish", image: "/seafoods/fish10.jpg", path: "/cuttlefish" },
               { name: "Frozen Items", image: "/seafoods/fish11.jpg", path: "/driedfish" },
-              { name: "Smoked Seafood", image: "/seafoods/fish12.jpg", path: "/smoked" },
+              { name: "Smoked Seafood", image: "/seafoods/fish12.jpg", path: "/" },
               { name: "Caviar", image: "/seafoods/fish13.jpg", path: "/caviar" },
             ].map((cat, index) => (
               <Link
@@ -107,15 +107,15 @@ export default function Home() {
                   rating: 5,
                 },
                 {
-                  name: "Tilmi Thishara",
-                  image: "/users/person3.jpg",
+                  name: "Sanidi Uthsari",
+                  image: "/users/person2.jpg",
                   review:
                     "Best seafood delivery I've tried. The prawns and crabs were perfectly packed. Will definitely order again!",
                   rating: 5,
                 },
                 {
-                  name: "Sanidi Uthsari",
-                  image: "/users/person2.jpg",
+                  name: "Tilmi Thishara",
+                  image: "/users/person3.jpg",
                   review:
                     "Great quality and variety. The smoked salmon was delicious and the customer service was top-notch.",
                   rating: 5,
