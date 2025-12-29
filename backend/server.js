@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-import bodyParser from "body-parser";
 import authRoutes from "./routes/auth.js";
 
 const app = express();
@@ -11,33 +10,37 @@ const app = express();
 const allowedOrigins = [
   "https://oceanwave4u.com",
   "https://www.oceanwave4u.com",
-  "http://localhost:5173", // Vite dev
+  "http://localhost:5173",
 ];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // allow requests with no origin (Postman, server-to-server)
-      if (!origin) return callback(null, true);
+// ✅ IMPORTANT: do NOT throw errors for blocked origins in production,
+// respond gracefully so preflight doesn't become 502.
+const corsOptions = {
+  origin: (origin, callback) => {
+    // allow requests with no origin (Postman, server-to-server)
+    if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+    if (allowedOrigins.includes(origin)) return callback(null, true);
 
-      return callback(
-        new Error(`CORS blocked: ${origin} is not allowed`)
-      );
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+    // block politely (no thrown error)
+    return callback(null, false);
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+// ✅ Apply CORS
+app.use(cors(corsOptions));
+
+// ✅ Handle preflight for ALL routes
+app.options("*", cors(corsOptions));
 
 /* --------------------------------------------------
    ✅ BODY PARSING
 -------------------------------------------------- */
-app.use(express.json()); // modern replacement for bodyParser.json()
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 /* --------------------------------------------------
    ✅ ROUTES
