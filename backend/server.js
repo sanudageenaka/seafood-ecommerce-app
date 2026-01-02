@@ -1,48 +1,65 @@
+// server.js
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import authRoutes from "./routes/authRoutes.js";
-import { pool } from "./db.js";
 
 dotenv.config();
 
 const app = express();
 
-// CORS origins list from env (comma-separated)
-const allowedOrigins = (process.env.CORS_ORIGIN || "")
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
+/* -----------------------------
+   ✅ CORS (Vercel + Domain + Local)
+   Fixes: "No 'Access-Control-Allow-Origin' header" + preflight OPTIONS
+------------------------------ */
+const allowedOrigins = [
+  "https://oceanwave4u.com",
+  "https://www.oceanwave4u.com",
+  "http://localhost:5173",
+];
 
 app.use(
   cors({
-    origin: (origin, cb) => {
-      if (!origin) return cb(null, true); // Postman / server-to-server
-      if (allowedOrigins.length === 0) return cb(null, true);
-      if (allowedOrigins.includes(origin)) return cb(null, true);
-      return cb(new Error(`CORS blocked: ${origin}`));
+    origin: (origin, callback) => {
+      // allow requests with no origin (Postman / server-to-server)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked: ${origin} is not allowed`));
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
+// ✅ must answer preflight
+app.options("*", cors());
+
+/* -----------------------------
+   ✅ Body parsing
+------------------------------ */
 app.use(express.json());
 
-// routes
+/* -----------------------------
+   ✅ Routes
+------------------------------ */
+import authRoutes from "./routes/authRoutes.js";
 app.use("/api/auth", authRoutes);
 
-// health check
-app.get("/", (req, res) => res.send("Backend is running ✅"));
-
-// test db connection
-app.get("/api/health/db", async (req, res) => {
-  try {
-    const r = await pool.query("SELECT 1 as ok");
-    res.json({ ok: true, db: r.rows[0] });
-  } catch (e) {
-    res.status(500).json({ ok: false, error: e.message });
-  }
+/* -----------------------------
+   ✅ Health checks
+------------------------------ */
+app.get("/", (req, res) => {
+  res.send("Backend is running ✅");
 });
 
+/* -----------------------------
+   ✅ Start server (Railway uses PORT)
+------------------------------ */
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
