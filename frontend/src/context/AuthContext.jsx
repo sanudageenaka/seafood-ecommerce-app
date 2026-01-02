@@ -1,78 +1,131 @@
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import axios from "axios";
 
-import { createContext, useContext, useState, useEffect } from 'react'
-import axios from 'axios'
+const AuthContext = createContext(null);
 
-// Create AuthContext
-const AuthContext = createContext()
+// ✅ Base URL (NO trailing slash)
+const API_BASE = (import.meta.env.VITE_API_URL || "http://localhost:5000").replace(
+  /\/$/,
+  ""
+);
+
+// ✅ Axios instance
+const api = axios.create({
+  baseURL: API_BASE,
+  headers: { "Content-Type": "application/json" },
+});
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [auth, setAuth] = useState(null); // { user, token }
+  const [loading, setLoading] = useState(true);
 
-  // 🧠 Load user from localStorage on refresh
+  // ✅ Load auth from localStorage on refresh
   useEffect(() => {
-    const storedUser = localStorage.getItem('user')
-    if (storedUser) {
-      setUser(JSON.parse(storedUser))
-    }
-    setLoading(false)
-  }, [])
+    try {
+      const stored = localStorage.getItem("auth");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setAuth(parsed);
 
-  // 🟢 Register
+        if (parsed?.token) {
+          api.defaults.headers.common.Authorization = `Bearer ${parsed.token}`;
+        }
+      }
+    } catch (e) {
+      console.error("Auth storage parse error:", e);
+      localStorage.removeItem("auth");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // ✅ helper to save auth
+  const setAndPersistAuth = (nextAuth) => {
+    setAuth(nextAuth);
+    localStorage.setItem("auth", JSON.stringify(nextAuth));
+
+    if (nextAuth?.token) {
+      api.defaults.headers.common.Authorization = `Bearer ${nextAuth.token}`;
+    } else {
+      delete api.defaults.headers.common.Authorization;
+    }
+  };
+
+  // 🟢 Register (returns backend response)
   const register = async (name, email, password) => {
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/register', {
+      const { data } = await api.post("/api/auth/register", {
         name,
         email,
         password,
-      })
-      return res.data
+      });
+
+      // ✅ If your backend returns token + user, auto-login
+      if (data?.token && data?.user) {
+        setAndPersistAuth({ user: data.user, token: data.token });
+      }
+
+      return data;
     } catch (error) {
-      throw error
+      const msg =
+        error?.response?.data?.details ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "Registration failed";
+      console.error("REGISTER ERROR:", error?.response?.data || error);
+      throw new Error(msg);
     }
-  }
+  };
 
   // 🟢 Login
   const login = async (email, password) => {
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', {
-        email,
-        password,
-      })
-      const userData = res.data
-      setUser(userData)
-      localStorage.setItem('user', JSON.stringify(userData))
-      // Optional: set default header for future requests
-      axios.defaults.headers.common['Authorization'] = `Bearer ${userData.token}`
-      return userData
+      const { data } = await api.post("/api/auth/login", { email, password });
+
+      // ✅ expect { user, token }
+      if (data?.token && data?.user) {
+        setAndPersistAuth({ user: data.user, token: data.token });
+      } else if (data?.token) {
+        // fallback if backend returns only token
+        setAndPersistAuth({ user: null, token: data.token });
+      }
+
+      return data;
     } catch (error) {
-      throw error
+      const msg =
+        error?.response?.data?.details ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "Login failed";
+      console.error("LOGIN ERROR:", error?.response?.data || error);
+      throw new Error(msg);
     }
-  }
+  };
 
   // 🔴 Logout
   const logout = () => {
-    setUser(null)
-    localStorage.removeItem('user')
-    delete axios.defaults.headers.common['Authorization']
-  }
+    setAndPersistAuth(null);
+  };
 
-  // Provide everything to children
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        login,
-        register,
-        logout,
-        isAuthenticated: !!user,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  )
-}
+  const value = useMemo(
+    () => ({
+      user: auth?.user || null,
+      token: auth?.token || null,
+      loading,
+      isAuthenticated: !!auth?.token,
+      register,
+      login,
+      logout,
+      api,
+    }),
+    [auth, loading]
+  );
 
-// Custom hook for easy access
-export const useAuth = () => useContext(AuthContext)
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
+};
