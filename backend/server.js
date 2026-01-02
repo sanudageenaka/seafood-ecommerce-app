@@ -8,35 +8,35 @@ dotenv.config();
 const app = express();
 
 /* -----------------------------
-   ✅ CORS (Vercel + Domain + Local)
-   Fixes: "No 'Access-Control-Allow-Origin' header" + preflight OPTIONS
+   ✅ CORS (Domain + Local)
 ------------------------------ */
-const allowedOrigins = [
-  "https://oceanwave4u.com",
-  "https://www.oceanwave4u.com",
-  "http://localhost:5173",
-];
+const allowedOrigins = (process.env.CORS_ORIGIN || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // allow requests with no origin (Postman / server-to-server)
-      if (!origin) return callback(null, true);
+// create ONE cors options object so OPTIONS uses same config
+const corsOptions = {
+  origin: (origin, callback) => {
+    // allow requests with no origin (Postman / server-to-server)
+    if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+    // if env not set, allow all (safe for debugging; set env in production)
+    if (allowedOrigins.length === 0) return callback(null, true);
 
-      return callback(new Error(`CORS blocked: ${origin} is not allowed`));
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
 
-// ✅ must answer preflight
-app.options("*", cors());
+    return callback(new Error(`CORS blocked: ${origin} is not allowed`));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+
+// ✅ MUST answer preflight with SAME options
+app.options("*", cors(corsOptions));
 
 /* -----------------------------
    ✅ Body parsing
@@ -50,16 +50,18 @@ import authRoutes from "./routes/authRoutes.js";
 app.use("/api/auth", authRoutes);
 
 /* -----------------------------
-   ✅ Health checks
+   ✅ Health check
 ------------------------------ */
 app.get("/", (req, res) => {
-  res.send("Backend is running ✅");
+  res.status(200).send("Backend is running ✅");
 });
 
 /* -----------------------------
    ✅ Start server (Railway uses PORT)
 ------------------------------ */
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const PORT = Number(process.env.PORT || 5000);
+
+// ✅ bind to 0.0.0.0 for Railway
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
