@@ -48,12 +48,11 @@ export default function FishPage() {
             <div key={p.id} className="border rounded-xl p-4 shadow bg-white">
               <img
                 src={p.image}
-                className="w-32 h-32 object-cover mb-3 rounded-lg mx-auto"
+                className="w-37 h-32 object-cover mb-3 rounded-lg mx-auto"
                 alt={p.name}
               />
-
-              <h2 className="font-semibold text-center">{p.name}</h2>
-              <p className="text-sm italic text-gray-600 text-center">{p.localName}</p>
+              <p className="font-semibold text-center">{p.localName}</p>
+              <h2 className="text-sm italic text-gray-600 text-center">{p.name}</h2>
               <p className="text-center font-bold text-green-700 mt-1">
                 LKR {p.price} / 1kg
               </p>
