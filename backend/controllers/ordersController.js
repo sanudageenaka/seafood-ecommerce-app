@@ -97,14 +97,25 @@ export async function createOrder(req, res) {
       total: order.total,
       status: order.status,
     });
-  } catch (e) {
-    await client.query("ROLLBACK");
-    return res.status(500).json({ error: e.message || "Failed to create order" });
-  } finally {
-    client.release();
-  }
-}
+} catch (e) {
+  await client.query("ROLLBACK");
 
+  console.error("CREATE ORDER ERROR:", {
+    message: e.message,
+    code: e.code,
+    detail: e.detail,
+    where: e.where,
+  });
+
+  return res.status(500).json({
+    error: "Failed to create order",
+    details: e.detail || e.message, // ✅ this will show in frontend
+    code: e.code || null,
+  });
+} finally {
+  client.release();
+}
+}
 export async function getMyOrders(req, res) {
   const userId = req.user.id;
 
