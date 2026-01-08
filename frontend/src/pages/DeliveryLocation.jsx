@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext.jsx";
 
 // Leaflet (OpenStreetMap)
 import {
@@ -70,7 +71,6 @@ function useDebouncedValue(value, delay = 350) {
 
 /**
  * OSM search: Nominatim (free)
- * NOTE: Nominatim has usage limits. This component debounces requests and only fires on meaningful queries.
  */
 async function nominatimSearch(query) {
   const url = new URL("https://nominatim.openstreetmap.org/search");
@@ -78,12 +78,10 @@ async function nominatimSearch(query) {
   url.searchParams.set("format", "json");
   url.searchParams.set("addressdetails", "1");
   url.searchParams.set("limit", "6");
-  url.searchParams.set("countrycodes", "lk"); // Sri Lanka only
+  url.searchParams.set("countrycodes", "lk");
   url.searchParams.set("accept-language", "en");
 
-  const res = await fetch(url.toString(), {
-    headers: { Accept: "application/json" },
-  });
+  const res = await fetch(url.toString(), { headers: { Accept: "application/json" } });
   if (!res.ok) throw new Error("Search failed");
   const data = await res.json();
 
@@ -97,10 +95,40 @@ async function nominatimSearch(query) {
 
 export default function DeliveryLocationLeaflet() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { items: cartItems, total: cartTotal, formatLKR } = useCart();
 
   // ✅ Delivery service area
   const center = { lat: 6.9271, lng: 79.8612 }; // Colombo
   const radiusMeters = 10000; // 10km
+
+  // ✅ checkout snapshot (router state -> sessionStorage -> cart fallback)
+  const checkoutSnapshot = useMemo(() => {
+    const fromState = location.state && location.state.items ? location.state : null;
+
+    let fromSession = null;
+    try {
+      const raw = sessionStorage.getItem("checkout_snapshot");
+      fromSession = raw ? JSON.parse(raw) : null;
+    } catch {
+      fromSession = null;
+    }
+
+    const fallback = {
+      items: cartItems || [],
+      total: cartTotal || 0,
+      createdAt: new Date().toISOString(),
+    };
+
+    return fromState || fromSession || fallback;
+  }, [location.state, cartItems, cartTotal]);
+
+  // If cart is empty and no snapshot items, block checkout flow
+  useEffect(() => {
+    if (!checkoutSnapshot?.items?.length) {
+      navigate("/checkout", { replace: true });
+    }
+  }, [checkoutSnapshot, navigate]);
 
   const [picked, setPicked] = useState(null);
   const [address, setAddress] = useState("");
@@ -125,7 +153,7 @@ export default function DeliveryLocationLeaflet() {
   const distance = useMemo(() => {
     if (!picked) return 0;
     return haversineMeters(center, picked);
-  }, [picked]);
+  }, [picked, center]);
 
   const inside = picked ? distance <= radiusMeters : false;
   const distanceKm = (distance / 1000).toFixed(2);
@@ -167,7 +195,7 @@ export default function DeliveryLocationLeaflet() {
         const results = await nominatimSearch(q);
         if (cancelled) return;
         setSuggestions(results);
-      } catch (e) {
+      } catch {
         if (cancelled) return;
         setSearchError("Could not fetch street suggestions. Try again.");
         setSuggestions([]);
@@ -228,7 +256,6 @@ export default function DeliveryLocationLeaflet() {
     );
   };
 
-  // ✅ Dropdown option: "Use My Current Location"
   const handleSelectMyLocationFromDropdown = () => {
     setSuggestions([]);
     setIsDropdownOpen(false);
@@ -239,15 +266,22 @@ export default function DeliveryLocationLeaflet() {
   const handleConfirm = () => {
     if (!picked || !inside) return;
 
-    localStorage.setItem(
-      "delivery_location",
-      JSON.stringify({
-        ...picked,
-        address,
-      })
-    );
+    const deliveryLocation = {
+      ...picked,
+      address,
+      createdAt: new Date().toISOString(),
+    };
 
-    navigate("/checkoutpage");
+    // ✅ Save for refresh usage
+    localStorage.setItem("delivery_location", JSON.stringify(deliveryLocation));
+
+    // ✅ Go to checkout page with state (so checkout page can show & save)
+    navigate("/checkoutpage", {
+      state: {
+        deliveryLocation,
+        checkoutSnapshot,
+      },
+    });
   };
 
   // Close dropdown when clicking outside
@@ -270,15 +304,12 @@ export default function DeliveryLocationLeaflet() {
             Delivery <span className="text-blue-600">Location</span>
           </h1>
           <p className="mt-3 text-gray-600 max-w-2xl mx-auto">
-            Search your street and choose an exact point on the map. We deliver
-            within <span className="font-semibold">{radiusKm} km</span>.
+            Search your street and choose an exact point on the map. We deliver within{" "}
+            <span className="font-semibold">{radiusKm} km</span>.
           </p>
 
-          <Link
-            to="/"
-            className="inline-block mt-4 text-sm text-blue-600 hover:underline"
-          >
-            Back to Home
+          <Link to="/checkout" className="inline-block mt-4 text-sm text-blue-600 hover:underline">
+            ← Back to Checkout
           </Link>
         </div>
       </section>
@@ -290,25 +321,18 @@ export default function DeliveryLocationLeaflet() {
             <div className="p-4 border-b bg-gray-50 flex flex-col gap-3">
               <div className="flex justify-between items-start gap-3">
                 <div>
-                  <p className="font-semibold text-[#002B5B]">
-  Search & pick your location
-</p>
+                  <p className="font-semibold text-[#002B5B]">Search & pick your location</p>
 
-                <p className="text-xs text-gray-500 leading-relaxed">
-  Type your street name, then click on the map to place the
-  pin. You can re-click to adjust.
-</p>
-
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    Type your street name, then click on the map to place the pin. You can re-click to adjust.
+                  </p>
                 </div>
 
                 <span
-  className={`px-3 py-1 rounded-xl text-sm font-semibold border 
-  inline-flex items-center justify-center text-center
-  min-w-[190px] h-8 ${badge.cls}`}
->
-  {badge.text}
-</span>
-
+                  className={`px-3 py-1 rounded-xl text-sm font-semibold border inline-flex items-center justify-center text-center min-w-[190px] h-8 ${badge.cls}`}
+                >
+                  {badge.text}
+                </span>
               </div>
 
               {/* Search (GPS only in dropdown ✅) */}
@@ -325,10 +349,8 @@ export default function DeliveryLocationLeaflet() {
                     placeholder="Search street / area (e.g., Galle Road, Nugegoda)..."
                   />
 
-                  {/* Dropdown (includes "Use My Current Location") */}
                   {isDropdownOpen && (
                     <div className="absolute z-[999] mt-2 w-full rounded-xl border bg-white shadow-lg overflow-hidden">
-                      {/* ✅ My Location option */}
                       <button
                         type="button"
                         onClick={handleSelectMyLocationFromDropdown}
@@ -337,12 +359,8 @@ export default function DeliveryLocationLeaflet() {
                       >
                         <span className="text-base">📍</span>
                         <div>
-                          <div className="text-sm font-semibold text-gray-900">
-                            Use My Current Location
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            Detect your position automatically
-                          </div>
+                          <div className="text-sm font-semibold text-gray-900">Use My Current Location</div>
+                          <div className="text-xs text-gray-500 mt-1">Detect your position automatically</div>
                         </div>
                       </button>
 
@@ -355,21 +373,14 @@ export default function DeliveryLocationLeaflet() {
                       ) : null}
 
                       {searchLoading ? (
-                        <div className="px-4 py-3 text-sm text-gray-600 border-t">
-                          Searching...
-                        </div>
+                        <div className="px-4 py-3 text-sm text-gray-600 border-t">Searching...</div>
                       ) : null}
 
                       {searchError ? (
-                        <div className="px-4 py-3 text-sm text-red-700 bg-red-50 border-t">
-                          {searchError}
-                        </div>
+                        <div className="px-4 py-3 text-sm text-red-700 bg-red-50 border-t">{searchError}</div>
                       ) : null}
 
-                      {!searchLoading &&
-                      !searchError &&
-                      suggestions &&
-                      suggestions.length > 0 ? (
+                      {!searchLoading && !searchError && suggestions?.length > 0 ? (
                         <div className="max-h-64 overflow-auto border-t">
                           {suggestions.map((s) => (
                             <button
@@ -378,9 +389,7 @@ export default function DeliveryLocationLeaflet() {
                               onClick={() => handleSelectSuggestion(s)}
                               className="w-full text-left px-4 py-3 hover:bg-gray-50 border-t first:border-t-0"
                             >
-                              <div className="text-sm font-medium text-gray-900">
-                                {s.displayName}
-                              </div>
+                              <div className="text-sm font-medium text-gray-900">{s.displayName}</div>
                               <div className="text-xs text-gray-500 mt-1">
                                 {fmtCoord(s.lat)} , {fmtCoord(s.lng)}
                               </div>
@@ -393,9 +402,7 @@ export default function DeliveryLocationLeaflet() {
                       !searchError &&
                       debouncedQuery.trim().length >= 3 &&
                       suggestions.length === 0 ? (
-                        <div className="px-4 py-3 text-sm text-gray-600 border-t">
-                          No results found.
-                        </div>
+                        <div className="px-4 py-3 text-sm text-gray-600 border-t">No results found.</div>
                       ) : null}
                     </div>
                   )}
@@ -421,48 +428,76 @@ export default function DeliveryLocationLeaflet() {
             </div>
 
             <div className="p-4 border-t flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-            <p className="text-xs text-gray-500 leading-relaxed">
-  {picked
-    ? inside
-      ? "Location selected within delivery area."
-      : "Selected location is outside our delivery area."
-    : "Search an address or use 'My Current Location', then click the map."}
-</p>
-
+              <p className="text-xs text-gray-500 leading-relaxed">
+                {picked
+                  ? inside
+                    ? `Location selected within delivery area. (${distanceKm} km from center)`
+                    : `Selected location is outside our delivery area. (${distanceKm} km from center)`
+                  : "Search an address or use 'My Current Location', then click the map."}
+              </p>
 
               <button
                 onClick={handleConfirm}
                 disabled={!picked || !inside}
                 className="px-6 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-60"
+                type="button"
               >
                 Confirm Location
               </button>
             </div>
           </div>
 
-          {/* Address */}
-          <aside className="bg-gray-50 border rounded-2xl p-6 h-fit">
-            <h3 className="text-xl font-bold text-[#002B5B]">
-              Delivery Address
-            </h3>
-            <p className="mt-2 text-xs text-gray-500 leading-relaxed">
-  Confirm your address details (house no, lane, landmark).
-</p>
+          {/* Right panel: Address + Order Summary */}
+          <aside className="bg-gray-50 border rounded-2xl p-6 h-fit space-y-6">
+            <div>
+              <h3 className="text-xl font-bold text-[#002B5B]">Delivery Address</h3>
+              <p className="mt-2 text-xs text-gray-500 leading-relaxed">
+                Confirm your address details (house no, lane, landmark).
+              </p>
 
+              <textarea
+                rows={5}
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                className="mt-4 w-full h-36 resize-none rounded-xl border px-4 py-3 focus:ring-2 focus:ring-blue-200"
+                placeholder="House no, street, landmark..."
+              />
 
-            {/* ✅ Fixed-size textarea */}
-            <textarea
-              rows={5}
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className="mt-4 w-full h-36 resize-none rounded-xl border px-4 py-3 focus:ring-2 focus:ring-blue-200"
-              placeholder="House no, street, landmark..."
-            />
+              <p className="mt-4 text-xs text-gray-500 leading-relaxed">
+                Delivery is available only inside the highlighted circle.
+              </p>
+            </div>
 
-            <p className="mt-4 text-xs text-gray-500 leading-relaxed">
-  Delivery is available only inside the highlighted circle.
-</p>
+            <div className="rounded-2xl border bg-white p-4">
+              <div className="flex items-center justify-between">
+                <p className="font-semibold text-gray-900">Order summary</p>
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-xl border bg-gray-50 text-gray-700">
+                  {checkoutSnapshot?.items?.length || 0} item
+                  {(checkoutSnapshot?.items?.length || 0) !== 1 ? "s" : ""}
+                </span>
+              </div>
 
+              <div className="mt-3 space-y-2 max-h-56 overflow-auto pr-1">
+                {(checkoutSnapshot?.items || []).map((it) => (
+                  <div key={it.id} className="flex items-start justify-between gap-3 text-sm">
+                    <div className="min-w-0">
+                      <p className="font-medium text-gray-900 truncate">{it.name}</p>
+                      <p className="text-xs text-gray-500">Qty: {it.qty}</p>
+                    </div>
+                    <p className="font-semibold text-gray-900 whitespace-nowrap">
+                      {formatLKR(Number(it.price) * Number(it.qty))}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 border-t pt-3 flex items-center justify-between">
+                <p className="text-sm text-gray-700">Total</p>
+                <p className="text-base font-bold text-gray-900">
+                  {formatLKR(checkoutSnapshot?.total || 0)}
+                </p>
+              </div>
+            </div>
           </aside>
         </div>
       </main>

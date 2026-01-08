@@ -1,10 +1,54 @@
 import { useCart } from "../context/CartContext";
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function CheckoutPage() {
-  const { items, total, clear, formatLKR } = useCart();
+  const { items: cartItems, total: cartTotal, clear, formatLKR } = useCart();
+  const { api, isAuthenticated } = useAuth();
+
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // ✅ cart snapshot (state -> sessionStorage -> cart fallback)
+  const checkoutSnapshot = useMemo(() => {
+    const fromState =
+      location.state?.checkoutSnapshot && location.state.checkoutSnapshot.items
+        ? location.state.checkoutSnapshot
+        : null;
+
+    let fromSession = null;
+    try {
+      const raw = sessionStorage.getItem("checkout_snapshot");
+      fromSession = raw ? JSON.parse(raw) : null;
+    } catch {
+      fromSession = null;
+    }
+
+    return (
+      fromState ||
+      fromSession || {
+        items: cartItems || [],
+        total: cartTotal || 0,
+      }
+    );
+  }, [location.state, cartItems, cartTotal]);
+
+  const items = checkoutSnapshot.items || [];
+  const total = Number(checkoutSnapshot.total || 0);
+
+  // ✅ delivery location (state -> localStorage)
+  const deliveryLocation = useMemo(() => {
+    const fromState = location.state?.deliveryLocation || null;
+    if (fromState) return fromState;
+
+    try {
+      const raw = localStorage.getItem("delivery_location");
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }, [location.state]);
 
   const [form, setForm] = useState({
     firstName: "",
@@ -19,10 +63,27 @@ export default function CheckoutPage() {
   });
 
   const [errors, setErrors] = useState({});
+  const [placing, setPlacing] = useState(false);
+  const [serverError, setServerError] = useState("");
+
+  // ✅ Prefill address using delivery_location
+  useEffect(() => {
+    if (deliveryLocation?.address) {
+      setForm((p) => ({ ...p, address: deliveryLocation.address }));
+    }
+  }, [deliveryLocation]);
+
+  // ✅ If cart empty, push user back
+  useEffect(() => {
+    if (!items.length) {
+      navigate("/checkout", { replace: true });
+    }
+  }, [items.length, navigate]);
 
   const handleChange = (e) => {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
     setErrors((p) => ({ ...p, [e.target.name]: "" }));
+    setServerError("");
   };
 
   const validate = () => {
@@ -30,24 +91,100 @@ export default function CheckoutPage() {
     if (!form.firstName.trim()) next.firstName = "First name is required";
     if (!form.phone.trim()) next.phone = "Mobile number is required";
     if (!form.address.trim()) next.address = "Delivery address is required";
+    if (!form.city.trim()) next.city = "City is required";
+    if (!form.paymentMethod) next.paymentMethod = "Select a payment method";
+
+    if (form.paymentMethod === "online" && !form.cardType) {
+      next.cardType = "Select a card type";
+    }
+
     setErrors(next);
     return Object.keys(next).length === 0;
   };
 
-  const handlePlaceOrder = () => {
+  const deliveryFee = 0;
+  const grandTotal = useMemo(() => total + deliveryFee, [total, deliveryFee]);
+
+  const handlePlaceOrder = async () => {
     if (!validate()) return;
 
-    if (form.paymentMethod === "online") {
-      navigate("/payment", { state: { cardType: form.cardType, total } });
-    } else {
-      alert("✅ Order placed successfully! Pay on delivery.");
-      clear();
-      navigate("/");
+    // ✅ require login (because /api/orders uses auth middleware)
+    if (!isAuthenticated) {
+      setServerError("Please login to place an order.");
+      return navigate("/login");
+    }
+
+    // ✅ require location selected (recommended)
+    if (!deliveryLocation?.lat || !deliveryLocation?.lng) {
+      setServerError("Please select your delivery location first.");
+      return navigate("/delivery-location");
+    }
+
+    setPlacing(true);
+    setServerError("");
+
+    try {
+      const payload = {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        phone: form.phone,
+        address: form.address,
+        city: form.city,
+        instructions: form.instructions,
+
+        paymentMethod: form.paymentMethod, // "cod" | "online"
+        cardType: form.paymentMethod === "online" ? form.cardType : null,
+
+        items: items.map((it) => ({
+          id: it.id,
+          name: it.name,
+          price: it.price,
+          qty: it.qty,
+        })),
+
+        deliveryFee,
+
+        // optional extra info (backend can ignore if you want)
+        deliveryLocation: {
+          lat: deliveryLocation.lat,
+          lng: deliveryLocation.lng,
+        },
+      };
+
+      const { data } = await api.post("/api/orders", payload);
+
+      const orderId = data?.orderId;
+
+      // ✅ clear cart snapshot after create
+      sessionStorage.removeItem("checkout_snapshot");
+
+      if (form.paymentMethod === "online") {
+        // go to payment with orderId
+        navigate("/payment", {
+          state: {
+            orderId,
+            cardType: form.cardType,
+            total: grandTotal,
+          },
+        });
+      } else {
+        // COD
+        clear();
+        localStorage.removeItem("delivery_location");
+        alert(`✅ Order placed! Your Order ID: ${orderId}`);
+        navigate("/");
+      }
+    } catch (e) {
+      const msg =
+        e?.response?.data?.error ||
+        e?.message ||
+        "Failed to place order. Please try again.";
+      setServerError(msg);
+    } finally {
+      setPlacing(false);
     }
   };
-
-  const deliveryFee = 0; // change if needed
-  const grandTotal = useMemo(() => total + deliveryFee, [total, deliveryFee]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
@@ -91,6 +228,13 @@ export default function CheckoutPage() {
                 Secure checkout
               </span>
             </div>
+
+            {/* ✅ show server error */}
+            {serverError ? (
+              <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                {serverError}
+              </div>
+            ) : null}
 
             {/* Form */}
             <div className="mt-6 space-y-4">
@@ -145,34 +289,32 @@ export default function CheckoutPage() {
                 </div>
 
                 <div>
-  <label className="text-sm font-medium text-gray-700">
-    Mobile number *
-  </label>
+                  <label className="text-sm font-medium text-gray-700">
+                    Mobile number *
+                  </label>
 
-  <div className="mt-1 flex">
-    {/* Country Code */}
-    <div className="flex items-center rounded-l-xl border border-r-0 bg-gray-50 px-4 text-sm text-gray-600">
-      +94
-    </div>
+                  <div className="mt-1 flex">
+                    <div className="flex items-center rounded-l-xl border border-r-0 bg-gray-50 px-4 text-sm text-gray-600">
+                      +94
+                    </div>
 
-    {/* Mobile Number */}
-    <input
-      name="phone"
-      value={form.phone}
-      onChange={handleChange}
-      placeholder="7X XXX XXXX"
-      className={`w-full rounded-r-xl border px-4 py-3 focus:ring-2 focus:ring-blue-200 outline-none ${
-        errors.phone ? "border-red-300" : "border-gray-200"
-      }`}
-    />
-  </div>
+                    <input
+                      name="phone"
+                      value={form.phone}
+                      onChange={handleChange}
+                      placeholder="7X XXX XXXX"
+                      className={`w-full rounded-r-xl border px-4 py-3 focus:ring-2 focus:ring-blue-200 outline-none ${
+                        errors.phone ? "border-red-300" : "border-gray-200"
+                      }`}
+                    />
+                  </div>
 
-  {errors.phone ? (
-    <p className="mt-1 text-xs text-red-600">{errors.phone}</p>
-  ) : null}
-</div>
+                  {errors.phone ? (
+                    <p className="mt-1 text-xs text-red-600">{errors.phone}</p>
+                  ) : null}
+                </div>
+              </div>
 
-</div>
               <div>
                 <label className="text-sm font-medium text-gray-700">
                   Delivery address *
@@ -189,6 +331,14 @@ export default function CheckoutPage() {
                 {errors.address ? (
                   <p className="mt-1 text-xs text-red-600">{errors.address}</p>
                 ) : null}
+
+                <button
+                  type="button"
+                  onClick={() => navigate("/delivery-location")}
+                  className="mt-2 text-xs font-semibold text-blue-700 hover:underline"
+                >
+                  Change delivery location
+                </button>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
@@ -201,8 +351,13 @@ export default function CheckoutPage() {
                     placeholder="City"
                     value={form.city}
                     onChange={handleChange}
-                    className="mt-1 w-full rounded-xl border border-gray-200 px-4 py-3 focus:ring-2 focus:ring-blue-200 outline-none"
+                    className={`mt-1 w-full rounded-xl border px-4 py-3 focus:ring-2 focus:ring-blue-200 outline-none ${
+                      errors.city ? "border-red-300" : "border-gray-200"
+                    }`}
                   />
+                  {errors.city ? (
+                    <p className="mt-1 text-xs text-red-600">{errors.city}</p>
+                  ) : null}
                 </div>
 
                 <div>
@@ -227,6 +382,10 @@ export default function CheckoutPage() {
                 <p className="text-sm text-gray-600 mt-1">
                   Choose how you’d like to pay.
                 </p>
+
+                {errors.paymentMethod ? (
+                  <p className="mt-2 text-xs text-red-600">{errors.paymentMethod}</p>
+                ) : null}
 
                 <div className="mt-4 grid sm:grid-cols-2 gap-3">
                   <label
@@ -258,6 +417,11 @@ export default function CheckoutPage() {
                         <p className="text-sm font-medium text-gray-700">
                           Card type
                         </p>
+
+                        {errors.cardType ? (
+                          <p className="mt-1 text-xs text-red-600">{errors.cardType}</p>
+                        ) : null}
+
                         <div className="mt-2 flex flex-wrap gap-3">
                           <label className="flex items-center gap-2 text-sm text-gray-700">
                             <input
@@ -316,15 +480,13 @@ export default function CheckoutPage() {
                   onClick={handlePlaceOrder}
                   type="button"
                   className="mt-6 w-full rounded-2xl bg-blue-600 text-white py-3.5 font-semibold hover:bg-blue-700 transition disabled:opacity-60"
-                  disabled={!items.length}
+                  disabled={!items.length || placing}
                 >
-                  Place order • {formatLKR(grandTotal)}
+                  {placing ? "Placing order..." : `Place order • ${formatLKR(grandTotal)}`}
                 </button>
 
                 {!items.length ? (
-                  <p className="mt-2 text-sm text-gray-500">
-                    Your cart is empty.
-                  </p>
+                  <p className="mt-2 text-sm text-gray-500">Your cart is empty.</p>
                 ) : null}
               </div>
             </div>
@@ -341,14 +503,9 @@ export default function CheckoutPage() {
 
             <div className="mt-5 divide-y">
               {items.map((item) => (
-                <div
-                  key={item.id}
-                  className="py-4 flex items-start justify-between gap-4"
-                >
+                <div key={item.id} className="py-4 flex items-start justify-between gap-4">
                   <div className="min-w-0">
-                    <p className="font-semibold text-gray-900 truncate">
-                      {item.name}
-                    </p>
+                    <p className="font-semibold text-gray-900 truncate">{item.name}</p>
                     <p className="text-sm text-gray-600 mt-1">
                       Qty: <span className="font-medium">{item.qty}</span>
                     </p>
@@ -379,17 +536,18 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-          <div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700">
-  Estimated delivery:{" "}
-  <span className="font-semibold text-blue-800">30–60 min</span>{" "}
-  within Colombo area.
-</div>
-
+            <div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700">
+              Estimated delivery:{" "}
+              <span className="font-semibold text-blue-800">30–60 min</span>{" "}
+              within Colombo area.
+            </div>
 
             <button
               type="button"
               onClick={() => {
                 clear();
+                sessionStorage.removeItem("checkout_snapshot");
+                localStorage.removeItem("delivery_location");
                 navigate("/");
               }}
               className="mt-4 w-full rounded-2xl border border-gray-200 py-3 font-semibold text-gray-800 hover:bg-gray-50 transition"

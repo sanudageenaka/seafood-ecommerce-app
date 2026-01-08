@@ -6,8 +6,18 @@ export default function Checkout() {
   const navigate = useNavigate();
 
   const handlePlaceOrder = () => {
-    // ✅ don't clear here
-    navigate("/delivery-location"); // OR "/delivery-location" depending your flow
+    if (!items.length) return;
+
+    // ✅ Save cart snapshot for the next page (safe even on refresh)
+    const snapshot = {
+      items,
+      total,
+      createdAt: new Date().toISOString(),
+    };
+    sessionStorage.setItem("checkout_snapshot", JSON.stringify(snapshot));
+
+    // ✅ Go to delivery location page
+    navigate("/delivery-location", { state: snapshot });
   };
 
   return (
@@ -27,16 +37,19 @@ export default function Checkout() {
                   alt={it.name}
                 />
 
-                <div className="flex-1">
-                  <p className="font-medium">{it.name}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium truncate">{it.name}</p>
                   <p className="text-gray-500 text-sm">Qty: {it.qty}</p>
                 </div>
 
-                <p className="font-bold">{formatLKR(it.price * it.qty)}</p>
+                <p className="font-bold whitespace-nowrap">
+                  {formatLKR(it.price * it.qty)}
+                </p>
 
                 <button
                   onClick={() => remove(it.id)}
                   className="text-sm text-red-600 hover:underline"
+                  type="button"
                 >
                   Remove
                 </button>
@@ -49,7 +62,9 @@ export default function Checkout() {
 
             <button
               onClick={handlePlaceOrder}
-              className="px-5 py-2 rounded-xl bg-blue-600 text-white hover:opacity-90"
+              className="px-5 py-2 rounded-xl bg-blue-600 text-white hover:opacity-90 disabled:opacity-60"
+              disabled={!items.length}
+              type="button"
             >
               Place order
             </button>
