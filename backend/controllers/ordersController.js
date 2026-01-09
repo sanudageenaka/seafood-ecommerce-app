@@ -101,16 +101,18 @@ export async function createOrder(req, res) {
   await client.query("ROLLBACK");
 
   console.error("CREATE ORDER ERROR:", {
-    message: e.message,
-    code: e.code,
-    detail: e.detail,
-    where: e.where,
+    message: e?.message,
+    code: e?.code,
+    detail: e?.detail,
+    where: e?.where,
+    constraint: e?.constraint,
   });
 
   return res.status(500).json({
     error: "Failed to create order",
-    details: e.detail || e.message, // ✅ this will show in frontend
-    code: e.code || null,
+    details: e?.detail || e?.message || "Unknown server error",
+    code: e?.code || null,
+    constraint: e?.constraint || null,
   });
 } finally {
   client.release();
