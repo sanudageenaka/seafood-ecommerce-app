@@ -175,17 +175,15 @@ export default function CheckoutPage() {
         alert(`✅ Order placed! Your Order ID: ${orderId}`);
         navigate("/");
       }
-    } catch (e) {
-      const msg =
-        e?.response?.data?.error ||
-        e?.message ||
-        "Failed to place order. Please try again.";
-      setServerError(msg);
-    } finally {
-      setPlacing(false);
-    }
-  };
-
+  } catch (e) {
+  console.log("ORDER ERROR FULL:", e?.response?.data);
+  setServerError(
+    e?.response?.data?.details ||
+    e?.response?.data?.error ||
+    "Failed to create order"
+  );
+}
+  }
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       {/* Top bar */}
