@@ -69,3 +69,5 @@ app.get("/api/debug/db", async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+import productRoutes from "./routes/products.js";
+app.use("/api/products", productRoutes);
