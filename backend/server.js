@@ -52,3 +52,18 @@ const PORT = Number(process.env.PORT || 5000);
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+app.get("/api/debug/db", async (req, res) => {
+  try {
+    const r = await pool.query("SELECT current_database() as db, current_schema() as schema");
+    const t = await pool.query(`
+      SELECT table_name
+      FROM information_schema.tables
+      WHERE table_schema='public'
+      ORDER BY table_name
+    `);
+    res.json({ connectedTo: r.rows[0], tables: t.rows.map(x => x.table_name) });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
