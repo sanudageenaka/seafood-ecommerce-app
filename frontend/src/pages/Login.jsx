@@ -3,8 +3,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { useNavigate, Link } from 'react-router-dom'
 
 export default function Login() {
-  const [email, setEmail] = useState('admin@example.com')
-  const [password, setPassword] = useState('admin123')
+
   const [error, setError] = useState('')
   const { login } = useAuth()
   const navigate = useNavigate()
@@ -28,7 +27,6 @@ export default function Login() {
         <div>
           <label className="text-sm text-gray-600">Email</label>
           <input
-            value={email}
             onChange={e => setEmail(e.target.value)}
             type="email"
             className="w-full border rounded-lg px-3 py-2"
@@ -37,7 +35,6 @@ export default function Login() {
         <div>
           <label className="text-sm text-gray-600">Password</label>
           <input
-            value={password}
             onChange={e => setPassword(e.target.value)}
             type="password"
             className="w-full border rounded-lg px-3 py-2"
