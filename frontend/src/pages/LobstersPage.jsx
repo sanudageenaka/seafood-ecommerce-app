@@ -4,15 +4,10 @@ import { useState } from "react";
 
 // Products
 const products = [
-  { id: 1, name: "Decapterus russelli", localName: "LINNA", price: 120, image: "/seafoods/fish14.jpg" },
-  { id: 2, name: "Istiophorus Platypterus", localName: "THALAPATH", price: 90, image: "/seafoods/fish15.jpg" },
-  { id: 3, name: "Skipjack Tuna", localName: "BALAYA", price: 75, image: "/seafoods/fish16.jpg" },
-  { id: 4, name: "Narrow-barred Spanish mackerel", localName: "THORA", price: 45, image: "/seafoods/fish17.jpg" },
-  { id: 5, name: "Yellowfin tuna", localName: "KELAWALLA", price: 85, image: "/seafoods/fish18.jpg" },
-  { id: 6, name: "Bigeye scad", localName: "BOLLA", price: 130, image: "/seafoods/fish19.jpg" },
+  { id: 1, name: "Lobsters", localName: "POKIRISSO", price: 120, image: "/seafoods/lobsters1.jpg" },
 ];
 
-export default function CrabsPage() {
+export default function LobstersPage() {
   const { items, add, remove, clear, total } = useCart();
   const navigate = useNavigate();
 
@@ -34,7 +29,7 @@ export default function CrabsPage() {
   const handleBuy = () => {
     if (items.length === 0) return alert("Cart is empty!");
     if (totalKg < 10) return alert(`Minimum total order is 10kg. You have ${totalKg}kg.`);
-    navigate("/checkoutpage");
+    navigate("/delivery-location");
   };
 
   return (
@@ -48,12 +43,11 @@ export default function CrabsPage() {
             <div key={p.id} className="border rounded-xl p-4 shadow bg-white">
               <img
                 src={p.image}
-                className="w-32 h-32 object-cover mb-3 rounded-lg mx-auto"
+                className="w-37 h-32 object-cover mb-3 rounded-lg mx-auto"
                 alt={p.name}
               />
-
-              <h2 className="font-semibold text-center">{p.name}</h2>
-              <p className="text-sm italic text-gray-600 text-center">{p.localName}</p>
+              <p className="font-semibold text-center">{p.localName}</p>
+              <h2 className="text-sm italic text-gray-600 text-center">{p.name}</h2>
               <p className="text-center font-bold text-green-700 mt-1">
                 LKR {p.price} / 1kg
               </p>
