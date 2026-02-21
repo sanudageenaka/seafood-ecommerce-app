@@ -39,7 +39,6 @@ app.use(express.json());
 import authRoutes from "./routes/authRoutes.js";
 import ordersRoutes from "./routes/orders.js";     // ✅ ADD
 
-
 app.use("/api/auth", authRoutes);
 app.use("/api/orders", ordersRoutes);             // ✅ ADD
 
@@ -69,5 +68,10 @@ app.get("/api/debug/db", async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
+
 import productRoutes from "./routes/products.js";
 app.use("/api/products", productRoutes);
+
+// ✅ ADD (Support/Feedback stamping route)
+import supportRoutes from "./routes/support.js";
+app.use("/api/support", supportRoutes);
