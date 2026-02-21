@@ -116,17 +116,31 @@ export default function Feedback() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-gray-800">
-                        Phone <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        name="phone"
-                        value={form.phone}
-                        onChange={onChange}
-                        className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:ring-2 focus:ring-blue-200"
-                        placeholder="+94 7X XXX XXXX"
-                      />
-                    </div>
+  <label className="block text-sm font-semibold text-gray-800">
+    Phone <span className="text-red-500">*</span>
+  </label>
+
+  <div className="mt-2 flex">
+    {/* Country Code (fixed to +94) */}
+    <div className="flex items-center px-4 rounded-l-xl border border-r-0 bg-gray-100 text-gray-700 font-medium">
+      +94
+    </div>
+
+    {/* Phone Number */}
+    <input
+      name="phone"
+      value={form.phone}
+      onChange={onChange}
+      className="w-full rounded-r-xl border px-4 py-3 outline-none focus:ring-2 focus:ring-blue-200"
+      placeholder="7X XXX XXXX"
+      maxLength={9}
+    />
+  </div>
+
+  <p className="mt-2 text-xs text-gray-500">
+    Enter 9 digits after +94 (Example: 7XXXXXXXX)
+  </p>
+</div>
                   </div>
 
                   {/* Row 2 */}
@@ -140,7 +154,7 @@ export default function Feedback() {
                         value={form.email}
                         onChange={onChange}
                         className="mt-2 w-full rounded-xl border px-4 py-3 outline-none focus:ring-2 focus:ring-blue-200"
-                        placeholder="you@email.com"
+                        placeholder="Your email"
                       />
                     </div>
 
@@ -316,15 +330,15 @@ export default function Feedback() {
             <div className="mt-6 space-y-3 text-left">
               <div className="bg-white rounded-2xl border shadow-sm p-5">
                 <p className="text-sm text-gray-500">Hotline</p>
-                <p className="font-semibold text-gray-900">+94XXXXXXXXX</p>
+                <p className="font-semibold text-gray-900">+94 707003766</p>
               </div>
               <div className="bg-white rounded-2xl border shadow-sm p-5">
                 <p className="text-sm text-gray-500">WhatsApp</p>
-                <p className="font-semibold text-gray-900">+94XXXXXXXXX</p>
+                <p className="font-semibold text-gray-900">+94 707003766</p>
               </div>
               <div className="bg-white rounded-2xl border shadow-sm p-5">
                 <p className="text-sm text-gray-500">Email</p>
-                <p className="font-semibold text-gray-900">support@oceanwave4u.com</p>
+                <p className="font-semibold text-gray-900">oceanwaveis4u@gmail.com</p>
               </div>
             </div>
 

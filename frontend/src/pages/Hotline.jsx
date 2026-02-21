@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 
 export default function Hotline() {
   // ✅ Change these
-  const HOTLINE = "+94XXXXXXXXX";
-  const WHATSAPP = "+94XXXXXXXXX";
-  const EMAIL = "support@oceanwave4u.com";
+  const HOTLINE = "+94707003766";
+  const WHATSAPP = "+947070003766";
+  const EMAIL = "oceanwaveis4u@gmail.com";
 
   const telLink = `tel:${HOTLINE.replace(/\s/g, "")}`;
   const waLink = `https://wa.me/${WHATSAPP.replace(/\D/g, "")}`;
