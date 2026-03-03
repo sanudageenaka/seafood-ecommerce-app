@@ -56,18 +56,51 @@ useEffect(() => {
       </section>
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-9">
 {/* Image Fade Section */}
-<section className="w-full h-[400px] overflow-hidden">
-  <img
-    src={bannerImages[bannerIndex]}
-    alt="Seafood Banner"
-    className={`w-full h-full object-contain transition-opacity duration-500 ${
-      bannerFade ? "opacity-0" : "opacity-100"
-    }`}
-  />
-</section>
+<section className="w-full h-[450px] flex items-center justify-center relative overflow-hidden rounded-xl">
 
+  {/* Image Wrapper */}
+  <div className="relative flex items-center justify-center">
+    
+    {/* Image */}
+    <img
+      src={bannerImages[bannerIndex]}
+      alt="Seafood Banner"
+      className={`max-h-[450px] max-w-full object-contain transition-opacity duration-700 ${
+        bannerFade ? "opacity-0" : "opacity-100"
+      }`}
+    />
+
+    {/* Previous Button */}
+    <button
+      onClick={() =>
+        setBannerIndex(
+          (prev) => (prev - 1 + bannerImages.length) % bannerImages.length
+        )
+      }
+      className="absolute -left-12 top-1/2 -translate-y-1/2 
+      bg-white/80 hover:bg-white p-2 rounded-full shadow transition"
+    >
+      ❮
+    </button>
+
+    {/* Next Button */}
+    <button
+      onClick={() =>
+        setBannerIndex(
+          (prev) => (prev + 1) % bannerImages.length
+        )
+      }
+      className="absolute -right-12 top-1/2 -translate-y-1/2 
+      bg-white/80 hover:bg-white p-2 rounded-full shadow transition"
+    >
+      ❯
+    </button>
+
+  </div>
+
+</section>
         {/* Category Section */}
         <section className="py-12 bg-white">
           <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
