@@ -464,7 +464,7 @@ export default function CheckoutPage() {
               <div className="flex justify-between text-sm text-gray-700">
                 <span>Delivery</span>
                 <span className="font-medium">
-                  {deliveryFee === 0 ? "Delivery charges will be applied later.We will inform you" : formatLKR(deliveryFee)}
+                  {deliveryFee === 0 ? "Delivery charges will be applied later." : formatLKR(deliveryFee)}
                 </span>
               </div>
 

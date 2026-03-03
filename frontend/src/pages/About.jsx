@@ -16,18 +16,21 @@ export default function About() {
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              to="/shop"
-              className="inline-flex items-center justify-center rounded-xl px-6 py-3 bg-blue-600 text-white font-semibold shadow-sm hover:bg-blue-700 transition"
-            >
-              Shop Now
-            </Link>
-            <Link
-              to="/contact"
-              className="inline-flex items-center justify-center rounded-xl px-6 py-3 bg-white text-gray-900 font-semibold border shadow-sm hover:bg-gray-50 transition"
-            >
-              Contact Us
-            </Link>
+            {/*
+<Link
+  to="/shop"
+  className="inline-flex items-center justify-center rounded-xl px-6 py-3 bg-blue-600 text-white font-semibold shadow-sm hover:bg-blue-700 transition"
+>
+  Shop Now
+</Link>
+
+<Link
+  to="/contact"
+  className="inline-flex items-center justify-center rounded-xl px-6 py-3 bg-white text-gray-900 font-semibold border shadow-sm hover:bg-gray-50 transition"
+>
+  Contact Us
+</Link>
+*/}
           </div>
         </div>
       </section>
@@ -148,14 +151,16 @@ export default function About() {
             confidence every time.
           </p>
 
-          <div className="mt-6">
-            <Link
-              to="/shop"
-              className="inline-flex items-center justify-center rounded-xl px-6 py-3 bg-blue-600 text-white font-semibold shadow-sm hover:bg-blue-700 transition"
-            >
-              Explore Products
-            </Link>
-          </div>
+          {/*
+<div className="mt-6">
+  <Link
+    to="/shop"
+    className="inline-flex items-center justify-center rounded-xl px-6 py-3 bg-blue-600 text-white font-semibold shadow-sm hover:bg-blue-700 transition"
+  >
+    Explore Products
+  </Link>
+</div>
+*/}
         </section>
       </main>
     </div>
