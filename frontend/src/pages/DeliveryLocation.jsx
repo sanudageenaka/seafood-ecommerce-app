@@ -100,7 +100,7 @@ export default function DeliveryLocationLeaflet() {
 
   // ✅ Delivery service area
   const center = { lat: 6.9271, lng: 79.8612 }; // Colombo
-  const radiusMeters = 10000; // 10km
+  const radiusMeters = 20000; // 10km
 
   // ✅ checkout snapshot (router state -> sessionStorage -> cart fallback)
   const checkoutSnapshot = useMemo(() => {

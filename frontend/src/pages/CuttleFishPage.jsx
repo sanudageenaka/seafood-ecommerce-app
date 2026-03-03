@@ -4,7 +4,7 @@ import { useState } from "react";
 
 // Products
 const products = [
-  { id: 1, name: "Cuttlefish", localName: "DELLA", price: 120, image: "/seafoods/cuttlefish1.jpg" },
+  { id: 1, name: "Cuttlefish", localName: "DELLA", price: 1800, image: "/seafoods/cuttlefish1.jpg" },
 
 ];
 

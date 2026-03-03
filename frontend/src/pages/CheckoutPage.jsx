@@ -58,8 +58,7 @@ export default function CheckoutPage() {
     address: "",
     city: "",
     instructions: "",
-    paymentMethod: "",
-    cardType: "",
+    paymentMethod: "", // only "cod" will be available
   });
 
   const [errors, setErrors] = useState({});
@@ -94,10 +93,6 @@ export default function CheckoutPage() {
     if (!form.city.trim()) next.city = "City is required";
     if (!form.paymentMethod) next.paymentMethod = "Select a payment method";
 
-    if (form.paymentMethod === "online" && !form.cardType) {
-      next.cardType = "Select a card type";
-    }
-
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -111,13 +106,15 @@ export default function CheckoutPage() {
     // ✅ require login (because /api/orders uses auth middleware)
     if (!isAuthenticated) {
       setServerError("Please login to place an order.");
-      return navigate("/login");
+      navigate("/login");
+      return;
     }
 
     // ✅ require location selected (recommended)
     if (!deliveryLocation?.lat || !deliveryLocation?.lng) {
       setServerError("Please select your delivery location first.");
-      return navigate("/delivery-location");
+      navigate("/delivery-location");
+      return;
     }
 
     setPlacing(true);
@@ -133,8 +130,7 @@ export default function CheckoutPage() {
         city: form.city,
         instructions: form.instructions,
 
-        paymentMethod: form.paymentMethod, // "cod" | "online"
-        cardType: form.paymentMethod === "online" ? form.cardType : null,
+        paymentMethod: form.paymentMethod, // "cod" only
 
         items: items.map((it) => ({
           id: it.id,
@@ -159,31 +155,23 @@ export default function CheckoutPage() {
       // ✅ clear cart snapshot after create
       sessionStorage.removeItem("checkout_snapshot");
 
-      if (form.paymentMethod === "online") {
-        // go to payment with orderId
-        navigate("/payment", {
-          state: {
-            orderId,
-            cardType: form.cardType,
-            total: grandTotal,
-          },
-        });
-      } else {
-        // COD
-        clear();
-        localStorage.removeItem("delivery_location");
-        alert(`✅ Order placed! Your Order ID: ${orderId}`);
-        navigate("/");
-      }
-  } catch (e) {
-  console.log("ORDER ERROR FULL:", e?.response?.data);
-  setServerError(
-    e?.response?.data?.details ||
-    e?.response?.data?.error ||
-    "Failed to create order"
-  );
-}
-  }
+      // COD only
+      clear();
+      localStorage.removeItem("delivery_location");
+      alert(`✅ Order placed! Your Order ID: ${orderId}`);
+      navigate("/");
+    } catch (e) {
+      console.log("ORDER ERROR FULL:", e?.response?.data);
+      setServerError(
+        e?.response?.data?.details ||
+          e?.response?.data?.error ||
+          "Failed to create order"
+      );
+    } finally {
+      setPlacing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       {/* Top bar */}
@@ -382,70 +370,13 @@ export default function CheckoutPage() {
                 </p>
 
                 {errors.paymentMethod ? (
-                  <p className="mt-2 text-xs text-red-600">{errors.paymentMethod}</p>
+                  <p className="mt-2 text-xs text-red-600">
+                    {errors.paymentMethod}
+                  </p>
                 ) : null}
 
                 <div className="mt-4 grid sm:grid-cols-2 gap-3">
-                  <label
-                    className={`rounded-2xl border p-4 cursor-pointer transition ${
-                      form.paymentMethod === "online"
-                        ? "border-blue-300 bg-blue-50"
-                        : "border-gray-200 hover:bg-gray-50"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="radio"
-                        name="paymentMethod"
-                        value="online"
-                        checked={form.paymentMethod === "online"}
-                        onChange={handleChange}
-                        className="mt-1"
-                      />
-                      <div>
-                        <p className="font-semibold text-gray-900">Pay online</p>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Debit or credit card.
-                        </p>
-                      </div>
-                    </div>
-
-                    {form.paymentMethod === "online" && (
-                      <div className="mt-4 pl-7">
-                        <p className="text-sm font-medium text-gray-700">
-                          Card type
-                        </p>
-
-                        {errors.cardType ? (
-                          <p className="mt-1 text-xs text-red-600">{errors.cardType}</p>
-                        ) : null}
-
-                        <div className="mt-2 flex flex-wrap gap-3">
-                          <label className="flex items-center gap-2 text-sm text-gray-700">
-                            <input
-                              type="radio"
-                              name="cardType"
-                              value="debit"
-                              checked={form.cardType === "debit"}
-                              onChange={handleChange}
-                            />
-                            Debit
-                          </label>
-                          <label className="flex items-center gap-2 text-sm text-gray-700">
-                            <input
-                              type="radio"
-                              name="cardType"
-                              value="credit"
-                              checked={form.cardType === "credit"}
-                              onChange={handleChange}
-                            />
-                            Credit
-                          </label>
-                        </div>
-                      </div>
-                    )}
-                  </label>
-
+                  {/* ✅ Only COD option */}
                   <label
                     className={`rounded-2xl border p-4 cursor-pointer transition ${
                       form.paymentMethod === "cod"
@@ -480,11 +411,15 @@ export default function CheckoutPage() {
                   className="mt-6 w-full rounded-2xl bg-blue-600 text-white py-3.5 font-semibold hover:bg-blue-700 transition disabled:opacity-60"
                   disabled={!items.length || placing}
                 >
-                  {placing ? "Placing order..." : `Place order • ${formatLKR(grandTotal)}`}
+                  {placing
+                    ? "Placing order..."
+                    : `Place order • ${formatLKR(grandTotal)}`}
                 </button>
 
                 {!items.length ? (
-                  <p className="mt-2 text-sm text-gray-500">Your cart is empty.</p>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Your cart is empty.
+                  </p>
                 ) : null}
               </div>
             </div>
@@ -501,9 +436,14 @@ export default function CheckoutPage() {
 
             <div className="mt-5 divide-y">
               {items.map((item) => (
-                <div key={item.id} className="py-4 flex items-start justify-between gap-4">
+                <div
+                  key={item.id}
+                  className="py-4 flex items-start justify-between gap-4"
+                >
                   <div className="min-w-0">
-                    <p className="font-semibold text-gray-900 truncate">{item.name}</p>
+                    <p className="font-semibold text-gray-900 truncate">
+                      {item.name}
+                    </p>
                     <p className="text-sm text-gray-600 mt-1">
                       Qty: <span className="font-medium">{item.qty}</span>
                     </p>
@@ -524,7 +464,7 @@ export default function CheckoutPage() {
               <div className="flex justify-between text-sm text-gray-700">
                 <span>Delivery</span>
                 <span className="font-medium">
-                  {deliveryFee === 0 ? "Free" : formatLKR(deliveryFee)}
+                  {deliveryFee === 0 ? "Delivery charges will be applied later.We will inform you" : formatLKR(deliveryFee)}
                 </span>
               </div>
 
@@ -536,7 +476,7 @@ export default function CheckoutPage() {
 
             <div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700">
               Estimated delivery:{" "}
-              <span className="font-semibold text-blue-800">30–60 min</span>{" "}
+              <span className="font-semibold text-blue-800">1-2 days</span>{" "}
               within Colombo area.
             </div>
 

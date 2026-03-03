@@ -66,12 +66,12 @@ export default function Home() {
           <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-6">
             {[
               { name: "Fresh Fish", image: "/seafoods/fish6.jpg", path: "/fish" },
-              { name: "Crabs", image: "/seafoods/fish7.jpg", path: "/crabs" },
+              { name: "Crabs", image: "/seafoods/fish7.jpg", path: "/crab" },
               { name: "Prawns", image: "/seafoods/fish8.jpg", path: "/prawns" },
-              { name: "Lobsters", image: "/seafoods/fish9.jpg", path: "/lobsters" },
+              { name: "Lobsters", image: "/seafoods/fish9.jpg", path: "/lobster" },
               { name: "Shellfish", image: "/seafoods/fish10.jpg", path: "/cuttlefish" },
-              { name: "Frozen Items", image: "/seafoods/fish11.jpg", path: "/driedfish" },
-              { name: "Smoked Seafood", image: "/seafoods/fish12.jpg", path: "/" },
+              { name: "Frozen Items", image: "/seafoods/fish11.jpg", path: "/frozen-items" },
+              { name: "Smoked Seafood", image: "/seafoods/fish12.jpg", path: "/smoked-seafood" },
               { name: "Caviar", image: "/seafoods/fish13.jpg", path: "/caviar" },
             ].map((cat, index) => (
               <Link
@@ -114,8 +114,8 @@ export default function Home() {
                   rating: 5,
                 },
                 {
-                  name: "Sujeewa Andrahennadige",
-                  image: "/users/person55.jpg",
+                  name: "Sanuda Geenaka",
+                  image: "/users/person4.jpg",
                   review:
                     "Great quality and variety. The smoked salmon was delicious and the customer service was top-notch.",
                   rating: 5,

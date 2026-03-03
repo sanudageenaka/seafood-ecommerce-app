@@ -4,12 +4,16 @@ import { useState } from "react";
 
 // Products
 const products = [
-  { id: 1, name: "Decapterus russelli", localName: "LINNA", price: 120, image: "/seafoods/fish14.jpg" },
-  { id: 2, name: "Istiophorus Platypterus", localName: "THALAPATH", price: 90, image: "/seafoods/fish15.jpg" },
-  { id: 3, name: "Skipjack Tuna", localName: "BALAYA", price: 75, image: "/seafoods/fish16.jpg" },
-  { id: 4, name: "Narrow-barred Spanish mackerel", localName: "THORA", price: 45, image: "/seafoods/fish17.jpg" },
-  { id: 5, name: "Yellowfin tuna", localName: "KELAWALLA", price: 85, image: "/seafoods/fish18.jpg" },
-  { id: 6, name: "Bigeye scad", localName: "BOLLA", price: 130, image: "/seafoods/fish19.jpg" },
+  //{ id: 1, name: "Decapterus russelli", localName: "LINNA", price: 120, image: "/seafoods/fish14.jpg" },
+  { id: 2, name: "Istiophorus Platypterus", localName: "THALAPATH", price: 1700, image: "/seafoods/fish15.jpg" },
+  { id: 3, name: "Skipjack Tuna", localName: "BALAYA", price: 800, image: "/seafoods/fish16.jpg" },
+ // { id: 4, name: "Narrow-barred Spanish mackerel", localName: "THORA", price: 45, image: "/seafoods/fish17.jpg" },
+  { id: 5, name: "Yellowfin tuna", localName: "KELAWALLA", price: 1100, image: "/seafoods/fish18.jpg" },
+  //{ id: 6, name: "Bigeye scad", localName: "BOLLA", price: 130, image: "/seafoods/fish19.jpg" },
+  { id: 7, name: "Marlin", localName: "KOPPARA", price: 2000, image: "/seafoods/fish20.jpg" },
+  { id: 8, name: "trevally", localName: "PARAW", price: 900, image: "/seafoods/fish21.jpg" },
+  { id: 9, name: "Swordfish", localName: "SAPPARA", price: 1100, image: "/seafoods/fish22.jpg" },
+  
 ];
 
 export default function FishPage() {

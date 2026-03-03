@@ -4,7 +4,7 @@ import { useState } from "react";
 
 // Products
 const products = [
-  { id: 1, name: "Lobsters", localName: "POKIRISSO", price: 120, image: "/seafoods/lobsters1.jpg" },
+  { id: 1, name: "Lobsters", localName: "POKIRISSO", price: 3600, image: "/seafoods/lobsters1.jpg" },
 ];
 
 export default function LobstersPage() {
