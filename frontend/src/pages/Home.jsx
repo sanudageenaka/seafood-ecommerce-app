@@ -36,27 +36,23 @@ export default function Home() {
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-4 py-8">
 
-        {/* Sliding Image Section */}
-        <section className="
-  relative overflow-hidden w-full py rounded-2xl
-  bg-[radial-gradient(900px_ellipse_at_top,_#e0f2fe_0%,_#f7fbff_42%,_#eef6ff_100%)]
-  border border-white/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.6),_0_8px_24px_rgba(15,23,42,0.08)]
-">
+     {/* Sliding Image Section */}
+{/* Sliding Image Section */}
+<section className="relative overflow-hidden w-full py-6 rounded-2xl bg-[radial-gradient(900px_ellipse_at_top,_#e0f2fe_0%,_#f7fbff_42%,_#eef6ff_100%)] border border-white/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.6),_0_8px_24px_rgba(15,23,42,0.08)]">
 
-          <div className="flex animate-scroll gap-8">
-            {["fish1.jpg", "fish2.jpg", "fish3.jpg", "fish4.jpg"].map(
-              (img, index) => (
-                <img
-                  key={index}
-                  src={`/seafoods/${img}`}
-                  alt={`Seafood ${index}`}
-                  className="w-80 h-90 object-cover rounded-2xl shadow-lg transition-transform duration-500 hover:scale-105"
-                />
-              )
-            )}
-          </div>
-        </section>
+  <div className="flex animate-scroll gap-4 w-max">
+    {[...["fish1.jpg", "fish2.jpg", "fish3.jpg", "fish4.jpg"]]
+      .map((img, index) => (
+        <img
+          key={index}
+          src={`/seafoods/${img}`}
+          alt={`Seafood ${index}`}
+          className="w-1/2 sm:w-64 h-60 sm:h-80 object-cover rounded-2xl shadow-lg"
+        />
+    ))}
+  </div>
 
+</section>
         {/* Category Section */}
         <section className="py-12 bg-white">
           <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
