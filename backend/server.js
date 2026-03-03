@@ -11,7 +11,7 @@ const app = express();
 /* -----------------------------
    ✅ CORS (Domain + Local)
 ------------------------------ */
-const allowedOrigins = (process.env.CORS_ORIGIN || "")
+const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5174")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);

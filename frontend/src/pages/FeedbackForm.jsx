@@ -1,9 +1,13 @@
+// Feedback.jsx
 import React, { useState } from "react";
+import { useAuth } from "../context/AuthContext"; // ✅ adjust path if different
 
 export default function Feedback() {
+  const { api, user } = useAuth(); // ✅ uses your shared axios instance (baseURL = VITE_API_URL)
+
   const [form, setForm] = useState({
     name: "",
-    phone: "",
+    phone: "", // expects 9 digits after +94 in your UI
     email: "",
     orderNo: "",
     category: "Delivery",
@@ -32,6 +36,9 @@ export default function Feedback() {
   const validate = () => {
     if (!form.name.trim()) return "Please enter your name.";
     if (!form.phone.trim()) return "Please enter your phone number.";
+    // basic Sri Lanka mobile validation: 9 digits starting with 7
+    if (!/^7\d{8}$/.test(form.phone.trim()))
+      return "Please enter a valid 9-digit Sri Lanka mobile number (starts with 7).";
     if (!form.message.trim()) return "Please write your feedback.";
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
       return "Please enter a valid email address.";
@@ -46,13 +53,32 @@ export default function Feedback() {
     try {
       setSubmitting(true);
 
-      // ✅ Replace this with your API call later (example below)
-      // await api.post("/api/feedback", form);
+      // ✅ Build payload exactly matching your backend route:
+      // Body: { name, phone, email?, orderNo?, category?, rating?, message, consent?, channel?, user_id? }
+      const payload = {
+        user_id: user?.id ?? null,
+        name: form.name.trim(),
+        phone: `+94${form.phone.trim()}`, // ✅ backend will also sanitize digits
+        email: form.email?.trim() || null,
+        orderNo: form.orderNo?.trim() || null,
+        category: form.category || "Other",
+        rating: Number(form.rating) || null,
+        message: form.message.trim(),
+        consent: Boolean(form.consent),
+        channel: "web",
+      };
 
-      await new Promise((r) => setTimeout(r, 700)); // fake submit
+      // ✅ REAL API CALL (this is what was missing)
+      await api.post("/api/support", payload);
+
       setSubmitted(true);
     } catch (error) {
-      alert("Something went wrong. Please try again.");
+      console.error("SUPPORT SUBMIT ERROR:", error?.response?.data || error);
+      alert(
+        error?.response?.data?.error ||
+          error?.response?.data?.details ||
+          "Something went wrong. Please try again."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -81,7 +107,8 @@ export default function Feedback() {
             Share <span className="text-blue-600">Feedback</span>
           </h1>
           <p className="mt-3 text-gray-600 max-w-2xl mx-auto">
-            Your feedback helps us improve quality, delivery, and your overall experience.
+            Your feedback helps us improve quality, delivery, and your overall
+            experience.
           </p>
         </div>
       </section>
@@ -116,31 +143,36 @@ export default function Feedback() {
                     </div>
 
                     <div>
-  <label className="block text-sm font-semibold text-gray-800">
-    Phone <span className="text-red-500">*</span>
-  </label>
+                      <label className="block text-sm font-semibold text-gray-800">
+                        Phone <span className="text-red-500">*</span>
+                      </label>
 
-  <div className="mt-2 flex">
-    {/* Country Code (fixed to +94) */}
-    <div className="flex items-center px-4 rounded-l-xl border border-r-0 bg-gray-100 text-gray-700 font-medium">
-      +94
-    </div>
+                      <div className="mt-2 flex">
+                        {/* Country Code (fixed to +94) */}
+                        <div className="flex items-center px-4 rounded-l-xl border border-r-0 bg-gray-100 text-gray-700 font-medium">
+                          +94
+                        </div>
 
-    {/* Phone Number */}
-    <input
-      name="phone"
-      value={form.phone}
-      onChange={onChange}
-      className="w-full rounded-r-xl border px-4 py-3 outline-none focus:ring-2 focus:ring-blue-200"
-      placeholder="7X XXX XXXX"
-      maxLength={9}
-    />
-  </div>
+                        {/* Phone Number */}
+                        <input
+                          name="phone"
+                          value={form.phone}
+                          onChange={(e) => {
+                            // ✅ keep only digits, max 9 digits
+                            const digits = e.target.value.replace(/\D/g, "").slice(0, 9);
+                            setForm((p) => ({ ...p, phone: digits }));
+                          }}
+                          className="w-full rounded-r-xl border px-4 py-3 outline-none focus:ring-2 focus:ring-blue-200"
+                          placeholder="7X XXX XXXX"
+                          maxLength={9}
+                          inputMode="numeric"
+                        />
+                      </div>
 
-  <p className="mt-2 text-xs text-gray-500">
-    Enter 9 digits after +94 (Example: 7XXXXXXXX)
-  </p>
-</div>
+                      <p className="mt-2 text-xs text-gray-500">
+                        Enter 9 digits after +94 (Example: 7XXXXXXXX)
+                      </p>
+                    </div>
                   </div>
 
                   {/* Row 2 */}
@@ -307,7 +339,8 @@ export default function Feedback() {
                   Thank you!
                 </h2>
                 <p className="mt-2 text-gray-600 max-w-md mx-auto">
-                  Your feedback has been received. We’ll review it and get back to you if needed.
+                  Your feedback has been received. We’ll review it and get back to
+                  you if needed.
                 </p>
 
                 <button
@@ -338,13 +371,16 @@ export default function Feedback() {
               </div>
               <div className="bg-white rounded-2xl border shadow-sm p-5">
                 <p className="text-sm text-gray-500">Email</p>
-                <p className="font-semibold text-gray-900">oceanwaveis4u@gmail.com</p>
+                <p className="font-semibold text-gray-900">
+                  oceanwaveis4u@gmail.com
+                </p>
               </div>
             </div>
 
             <div className="mt-6 p-4 rounded-2xl bg-blue-50 border">
               <p className="text-sm text-gray-700">
-                Tip: Include your order number if you have one. It helps us respond faster.
+                Tip: Include your order number if you have one. It helps us respond
+                faster.
               </p>
             </div>
           </aside>

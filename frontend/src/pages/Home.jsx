@@ -44,7 +44,7 @@ export default function Home() {
 ">
 
           <div className="flex animate-scroll gap-8">
-            {["fish1.jpg", "fish2.jpg", "fish3.jpg", "fish4.jpg", "fish5.jpg"].map(
+            {["fish1.jpg", "fish2.jpg", "fish3.jpg", "fish4.jpg"].map(
               (img, index) => (
                 <img
                   key={index}
@@ -114,8 +114,8 @@ export default function Home() {
                   rating: 5,
                 },
                 {
-                  name: "Tilmi Thishara",
-                  image: "/users/person3.jpg",
+                  name: "Sujeewa Andrahennadige",
+                  image: "/users/person55.jpg",
                   review:
                     "Great quality and variety. The smoked salmon was delicious and the customer service was top-notch.",
                   rating: 5,
