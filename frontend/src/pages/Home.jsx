@@ -300,7 +300,7 @@ useEffect(() => {
         </div>
 
         <div className="text-center text-gray-400 mt-10">
-          © {new Date().getFullYear()} Seafood Market. All rights reserved.
+          © {new Date().getFullYear()} ShopLite. All rights reserved.
         </div>
       </footer>
     </div>
