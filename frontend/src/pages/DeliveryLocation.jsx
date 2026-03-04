@@ -96,13 +96,16 @@ async function nominatimSearch(query) {
 export default function DeliveryLocationLeaflet() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { items: cartItems, total: cartTotal, formatLKR } = useCart();
+
+  // ✅ Updated cart values (no total price anymore)
+  const { items: cartItems, totalKg: cartTotalKg } = useCart();
 
   // ✅ Delivery service area
   const center = { lat: 6.9271, lng: 79.8612 }; // Colombo
-  const radiusMeters = 20000; // 10km
+  const radiusMeters = 20000; // 20km
 
   // ✅ checkout snapshot (router state -> sessionStorage -> cart fallback)
+  // Snapshot stores only kg/items, not price
   const checkoutSnapshot = useMemo(() => {
     const fromState = location.state && location.state.items ? location.state : null;
 
@@ -116,12 +119,12 @@ export default function DeliveryLocationLeaflet() {
 
     const fallback = {
       items: cartItems || [],
-      total: cartTotal || 0,
+      totalKg: cartTotalKg || 0,
       createdAt: new Date().toISOString(),
     };
 
     return fromState || fromSession || fallback;
-  }, [location.state, cartItems, cartTotal]);
+  }, [location.state, cartItems, cartTotalKg]);
 
   // If cart is empty and no snapshot items, block checkout flow
   useEffect(() => {
@@ -275,7 +278,8 @@ export default function DeliveryLocationLeaflet() {
     // ✅ Save for refresh usage
     localStorage.setItem("delivery_location", JSON.stringify(deliveryLocation));
 
-    // ✅ Go to checkout page with state (so checkout page can show & save)
+    // ✅ Go to checkout page with state
+    // NOTE: final price should be calculated in /checkoutpage using delivery-date prices
     navigate("/checkoutpage", {
       state: {
         deliveryLocation,
@@ -322,7 +326,6 @@ export default function DeliveryLocationLeaflet() {
               <div className="flex justify-between items-start gap-3">
                 <div>
                   <p className="font-semibold text-[#002B5B]">Search & pick your location</p>
-
                   <p className="text-xs text-gray-500 leading-relaxed">
                     Type your street name, then click on the map to place the pin. You can re-click to adjust.
                   </p>
@@ -482,21 +485,27 @@ export default function DeliveryLocationLeaflet() {
                   <div key={it.id} className="flex items-start justify-between gap-3 text-sm">
                     <div className="min-w-0">
                       <p className="font-medium text-gray-900 truncate">{it.name}</p>
-                      <p className="text-xs text-gray-500">Qty: {it.qty}</p>
+                      <p className="text-xs text-gray-500">Qty: {it.qty}kg</p>
                     </div>
-                    <p className="font-semibold text-gray-900 whitespace-nowrap">
-                      {formatLKR(Number(it.price) * Number(it.qty))}
+
+                    {/* ✅ No price here */}
+                    <p className="text-xs text-gray-500 whitespace-nowrap">
+                      Price on delivery day
                     </p>
                   </div>
                 ))}
               </div>
 
               <div className="mt-4 border-t pt-3 flex items-center justify-between">
-                <p className="text-sm text-gray-700">Total</p>
+                <p className="text-sm text-gray-700">Total Weight</p>
                 <p className="text-base font-bold text-gray-900">
-                  {formatLKR(checkoutSnapshot?.total || 0)}
+                  {checkoutSnapshot?.totalKg ?? 0}kg
                 </p>
               </div>
+
+              <p className="mt-2 text-xs text-gray-500">
+                Final total will be calculated using the fish price on the delivery date (2 days later).
+              </p>
             </div>
           </aside>
         </div>

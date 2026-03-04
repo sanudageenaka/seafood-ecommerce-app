@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export default function CheckoutPage() {
-  const { items: cartItems, total: cartTotal, clear, formatLKR } = useCart();
+  // ✅ Updated cart context (NO formatLKR, NO total price)
+  const { items: cartItems, totalKg: cartTotalKg, clear } = useCart();
   const { api, isAuthenticated } = useAuth();
 
   const navigate = useNavigate();
@@ -29,13 +30,13 @@ export default function CheckoutPage() {
       fromState ||
       fromSession || {
         items: cartItems || [],
-        total: cartTotal || 0,
+        totalKg: cartTotalKg || 0,
       }
     );
-  }, [location.state, cartItems, cartTotal]);
+  }, [location.state, cartItems, cartTotalKg]);
 
   const items = checkoutSnapshot.items || [];
-  const total = Number(checkoutSnapshot.total || 0);
+  const totalKg = Number(checkoutSnapshot.totalKg || 0);
 
   // ✅ delivery location (state -> localStorage)
   const deliveryLocation = useMemo(() => {
@@ -58,7 +59,7 @@ export default function CheckoutPage() {
     address: "",
     city: "",
     instructions: "",
-    paymentMethod: "", // only "cod" will be available
+    paymentMethod: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -92,25 +93,19 @@ export default function CheckoutPage() {
     if (!form.address.trim()) next.address = "Delivery address is required";
     if (!form.city.trim()) next.city = "City is required";
     if (!form.paymentMethod) next.paymentMethod = "Select a payment method";
-
     setErrors(next);
     return Object.keys(next).length === 0;
   };
 
-  const deliveryFee = 0;
-  const grandTotal = useMemo(() => total + deliveryFee, [total, deliveryFee]);
-
   const handlePlaceOrder = async () => {
     if (!validate()) return;
 
-    // ✅ require login (because /api/orders uses auth middleware)
     if (!isAuthenticated) {
       setServerError("Please login to place an order.");
       navigate("/login");
       return;
     }
 
-    // ✅ require location selected (recommended)
     if (!deliveryLocation?.lat || !deliveryLocation?.lng) {
       setServerError("Please select your delivery location first.");
       navigate("/delivery-location");
@@ -121,6 +116,7 @@ export default function CheckoutPage() {
     setServerError("");
 
     try {
+      // ✅ Send only id, name, qty (kg) — NO price
       const payload = {
         firstName: form.firstName,
         lastName: form.lastName,
@@ -129,33 +125,26 @@ export default function CheckoutPage() {
         address: form.address,
         city: form.city,
         instructions: form.instructions,
-
-        paymentMethod: form.paymentMethod, // "cod" only
+        paymentMethod: form.paymentMethod, // "cod"
 
         items: items.map((it) => ({
-          id: it.id,
-          name: it.name,
-          price: it.price,
-          qty: it.qty,
-        })),
+  id: Number(it.id),
+  qty: Number(it.qty),
+})),
 
-        deliveryFee,
-
-        // optional extra info (backend can ignore if you want)
         deliveryLocation: {
           lat: deliveryLocation.lat,
           lng: deliveryLocation.lng,
         },
+
+        pricingRule: "DELIVERY_DAY_PRICE",
       };
 
       const { data } = await api.post("/api/orders", payload);
-
       const orderId = data?.orderId;
 
-      // ✅ clear cart snapshot after create
       sessionStorage.removeItem("checkout_snapshot");
 
-      // COD only
       clear();
       localStorage.removeItem("delivery_location");
       alert(`✅ Order placed! Your Order ID: ${orderId}`);
@@ -215,7 +204,6 @@ export default function CheckoutPage() {
               </span>
             </div>
 
-            {/* ✅ show server error */}
             {serverError ? (
               <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
                 {serverError}
@@ -365,9 +353,6 @@ export default function CheckoutPage() {
                 <h3 className="text-lg font-bold text-gray-900">
                   Payment method
                 </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  Choose how you’d like to pay.
-                </p>
 
                 {errors.paymentMethod ? (
                   <p className="mt-2 text-xs text-red-600">
@@ -376,7 +361,6 @@ export default function CheckoutPage() {
                 ) : null}
 
                 <div className="mt-4 grid sm:grid-cols-2 gap-3">
-                  {/* ✅ Only COD option */}
                   <label
                     className={`rounded-2xl border p-4 cursor-pointer transition ${
                       form.paymentMethod === "cod"
@@ -398,7 +382,7 @@ export default function CheckoutPage() {
                           Pay on delivery
                         </p>
                         <p className="text-sm text-gray-600 mt-1">
-                          Cash or card at your doorstep.
+                          Cash at your doorstep.
                         </p>
                       </div>
                     </div>
@@ -411,16 +395,8 @@ export default function CheckoutPage() {
                   className="mt-6 w-full rounded-2xl bg-blue-600 text-white py-3.5 font-semibold hover:bg-blue-700 transition disabled:opacity-60"
                   disabled={!items.length || placing}
                 >
-                  {placing
-                    ? "Placing order..."
-                    : `Place order • ${formatLKR(grandTotal)}`}
+                  {placing ? "Placing order..." : "Place order"}
                 </button>
-
-                {!items.length ? (
-                  <p className="mt-2 text-sm text-gray-500">
-                    Your cart is empty.
-                  </p>
-                ) : null}
               </div>
             </div>
           </div>
@@ -445,11 +421,12 @@ export default function CheckoutPage() {
                       {item.name}
                     </p>
                     <p className="text-sm text-gray-600 mt-1">
-                      Qty: <span className="font-medium">{item.qty}</span>
+                      Qty: <span className="font-medium">{item.qty}kg</span>
                     </p>
                   </div>
-                  <p className="font-semibold text-gray-900">
-                    {formatLKR(item.price * item.qty)}
+
+                  <p className="text-xs text-gray-500 whitespace-nowrap">
+                    Price on delivery day
                   </p>
                 </div>
               ))}
@@ -457,27 +434,14 @@ export default function CheckoutPage() {
 
             <div className="mt-6 space-y-2 border-t pt-4">
               <div className="flex justify-between text-sm text-gray-700">
-                <span>Subtotal</span>
-                <span className="font-medium">{formatLKR(total)}</span>
+                <span>Total Weight</span>
+                <span className="font-medium">{totalKg}kg</span>
               </div>
 
-              <div className="flex justify-between text-sm text-gray-700">
-                <span>Delivery</span>
-                <span className="font-medium">
-                  {deliveryFee === 0 ? "Delivery charges will be applied later." : formatLKR(deliveryFee)}
-                </span>
+              <div className="mt-3 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700">
+                Final total will be calculated using the fish price on the
+                delivery date (2 days later).
               </div>
-
-              <div className="flex justify-between text-base font-bold text-gray-900 pt-2">
-                <span>Total</span>
-                <span>{formatLKR(grandTotal)}</span>
-              </div>
-            </div>
-
-            <div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-700">
-              Estimated delivery:{" "}
-              <span className="font-semibold text-blue-800">1-2 days</span>{" "}
-              within Colombo area.
             </div>
 
             <button

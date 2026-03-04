@@ -4,6 +4,11 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { pool } from "./db.js";
 
+import authRoutes from "./routes/authRoutes.js";
+import ordersRoutes from "./routes/orders.js";
+import productRoutes from "./routes/products.js";
+import supportRoutes from "./routes/support.js";
+
 dotenv.config();
 
 const app = express();
@@ -18,7 +23,7 @@ const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5174")
 
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
+    if (!origin) return callback(null, true); // allow server-to-server / Postman
     if (allowedOrigins.length === 0) return callback(null, true);
     if (allowedOrigins.includes(origin)) return callback(null, true);
     return callback(new Error(`CORS blocked: ${origin} is not allowed`));
@@ -36,11 +41,10 @@ app.use(express.json());
 /* -----------------------------
    ✅ Routes
 ------------------------------ */
-import authRoutes from "./routes/authRoutes.js";
-import ordersRoutes from "./routes/orders.js";     // ✅ ADD
-
 app.use("/api/auth", authRoutes);
-app.use("/api/orders", ordersRoutes);             // ✅ ADD
+app.use("/api/orders", ordersRoutes); // kg-only order create
+app.use("/api/products", productRoutes); // daily price display
+app.use("/api/support", supportRoutes);
 
 /* -----------------------------
    ✅ Health check
@@ -49,29 +53,35 @@ app.get("/", (req, res) => {
   res.status(200).send("Backend is running ✅");
 });
 
-const PORT = Number(process.env.PORT || 5000);
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
+/* -----------------------------
+   ✅ Debug DB route
+------------------------------ */
 app.get("/api/debug/db", async (req, res) => {
   try {
-    const r = await pool.query("SELECT current_database() as db, current_schema() as schema");
+    const r = await pool.query(
+      "SELECT current_database() as db, current_schema() as schema"
+    );
+
     const t = await pool.query(`
       SELECT table_name
       FROM information_schema.tables
       WHERE table_schema='public'
       ORDER BY table_name
     `);
-    res.json({ connectedTo: r.rows[0], tables: t.rows.map(x => x.table_name) });
+
+    res.json({
+      connectedTo: r.rows[0],
+      tables: t.rows.map((x) => x.table_name),
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });
 
-import productRoutes from "./routes/products.js";
-app.use("/api/products", productRoutes);
-
-// ✅ ADD (Support/Feedback stamping route)
-import supportRoutes from "./routes/support.js";
-app.use("/api/support", supportRoutes);
+/* -----------------------------
+   ✅ Start Server
+------------------------------ */
+const PORT = Number(process.env.PORT || 5000);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
+});

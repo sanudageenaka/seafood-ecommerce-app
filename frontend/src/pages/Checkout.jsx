@@ -2,21 +2,20 @@ import { useCart } from "../context/CartContext.jsx";
 import { useNavigate } from "react-router-dom";
 
 export default function Checkout() {
-  const { items, total, remove, formatLKR } = useCart();
+  const { items, totalKg, remove } = useCart();
   const navigate = useNavigate();
 
   const handlePlaceOrder = () => {
     if (!items.length) return;
 
-    // ✅ Save cart snapshot for the next page (safe even on refresh)
     const snapshot = {
       items,
-      total,
+      totalKg,
       createdAt: new Date().toISOString(),
     };
+
     sessionStorage.setItem("checkout_snapshot", JSON.stringify(snapshot));
 
-    // ✅ Go to delivery location page
     navigate("/delivery-location", { state: snapshot });
   };
 
@@ -32,19 +31,18 @@ export default function Checkout() {
             {items.map((it) => (
               <li key={it.id} className="py-3 flex items-center gap-3">
                 <img
-                  className="w-16 h-16 rounded-lg object-cover bg-gray-100"
+                  className="w-1600 h-16 rounded-lg object-cover bg-gray-100"
                   src={it.image || `https://picsum.photos/seed/${it.id}/200/200`}
                   alt={it.name}
                 />
 
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{it.name}</p>
-                  <p className="text-gray-500 text-sm">Qty: {it.qty}</p>
+                  <p className="text-gray-500 text-sm">Qty: {it.qty}kg</p>
+                  <p className="text-xs text-gray-400">
+                    Final price will be calculated on delivery day
+                  </p>
                 </div>
-
-                <p className="font-bold whitespace-nowrap">
-                  {formatLKR(it.price * it.qty)}
-                </p>
 
                 <button
                   onClick={() => remove(it.id)}
@@ -58,7 +56,7 @@ export default function Checkout() {
           </ul>
 
           <div className="flex items-center justify-between pt-4">
-            <p className="text-lg font-bold">Total: {formatLKR(total)}</p>
+            <p className="text-lg font-bold">Total Weight: {totalKg}kg</p>
 
             <button
               onClick={handlePlaceOrder}
@@ -66,7 +64,7 @@ export default function Checkout() {
               disabled={!items.length}
               type="button"
             >
-              Place order
+              Place Order
             </button>
           </div>
         </div>

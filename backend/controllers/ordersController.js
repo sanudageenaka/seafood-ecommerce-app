@@ -12,22 +12,19 @@ export async function createOrder(req, res) {
     address,
     city,
     instructions,
-    paymentMethod, // "cod" | "online"
-    cardType,      // "debit" | "credit" (only for online)
-    items,         // [{id,name,price,qty}]
-    deliveryFee = 0,
+    paymentMethod = "cod", // default cod
+    cardType = null,       // only for online
+    items,                 // ✅ [{ id, qty }] (kg only)
+    deliveryDate = null,   // optional: backend can set today+2 days if you want
   } = req.body;
 
-  // ✅ Validate
+  // ✅ Validate order fields
   if (!firstName?.trim()) return res.status(400).json({ error: "First name is required" });
   if (!phone?.trim()) return res.status(400).json({ error: "Mobile number is required" });
   if (!address?.trim()) return res.status(400).json({ error: "Delivery address is required" });
   if (!city?.trim()) return res.status(400).json({ error: "City is required" });
 
-  if (!Array.isArray(items) || items.length === 0) {
-    return res.status(400).json({ error: "Cart items are required" });
-  }
-
+  // ✅ Validate payment
   if (!["cod", "online"].includes(paymentMethod)) {
     return res.status(400).json({ error: "Invalid payment method" });
   }
@@ -36,88 +33,122 @@ export async function createOrder(req, res) {
     return res.status(400).json({ error: "Card type is required for online payments" });
   }
 
-  // ✅ Calculate totals on server
-  const subtotal = items.reduce((sum, it) => sum + Number(it.price) * Number(it.qty), 0);
-  const total = subtotal + Number(deliveryFee || 0);
-
-  const status = paymentMethod === "cod" ? "cod_pending" : "pending";
+  // ✅ Validate items array
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: "Cart items are required" });
+  }
 
   const client = await pool.connect();
+
   try {
     await client.query("BEGIN");
 
-    const orderInsert = await client.query(
-      `INSERT INTO orders (
-        user_id, first_name, last_name, email, phone, address, city, instructions,
-        payment_method, card_type, subtotal, delivery_fee, total, status
-      ) VALUES (
-        $1,$2,$3,$4,$5,$6,$7,$8,
-        $9,$10,$11,$12,$13,$14
-      ) RETURNING *`,
-      [
-        userId,
-        firstName.trim(),
-        lastName?.trim() || null,
-        email?.trim() || null,
-        phone.trim(),
-        address.trim(),
-        city.trim(),
-        instructions?.trim() || null,
-        paymentMethod,
-        paymentMethod === "online" ? cardType : null,
-        subtotal,
-        Number(deliveryFee || 0),
-        total,
-        status,
-      ]
-    );
+    // ✅ create order WITHOUT totals (price calculated later)
+  const orderInsert = await client.query(
+  `INSERT INTO orders (
+    user_id,
+    first_name,
+    last_name,
+    email,
+    phone,
+    address,
+    city,
+    instructions,
+    payment_method,
+    card_type,
+    subtotal,
+    delivery_fee,
+    total,
+    status,
+    pricing_status
+  )
+  VALUES (
+    $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15
+  )
+  RETURNING *`,
+  [
+    userId,
+    firstName.trim(),
+    lastName?.trim() || null,
+    email?.trim() || null,
+    phone.trim(),
+    address.trim(),
+    city.trim(),
+    instructions?.trim() || null,
+    paymentMethod,
+    paymentMethod === "online" ? cardType : null,
+
+    0, // subtotal (price calculated later)
+    0, // delivery_fee
+    0, // total
+
+    "pending_pricing",
+    "pending_pricing",
+  ]
+);
 
     const order = orderInsert.rows[0];
 
-    for (const it of items) {
-      const qty = Number(it.qty);
-      const price = Number(it.price);
+    // ✅ Insert order items (kg only)
+   for (const it of items) {
+  // ✅ accept multiple field names safely
+  const productId = Number(it.id ?? it.product_id ?? it.productId);
+  const qty = Number(it.qty ?? it.kg ?? it.quantity);
 
-      if (!it.name || !qty || qty <= 0 || !price || price <= 0) {
-        throw new Error("Invalid item data");
-      }
+  // ✅ debug: show which item is wrong
+  if (!Number.isFinite(productId) || productId <= 0 || !Number.isFinite(qty) || qty <= 0) {
+    console.log("❌ INVALID ITEM RECEIVED:", it);
+    throw new Error("Invalid item data");
+  }
 
-      await client.query(
-        `INSERT INTO order_items (order_id, product_id, name, price, qty, line_total)
-         VALUES ($1,$2,$3,$4,$5,$6)`,
-        [order.id, String(it.id ?? ""), String(it.name), price, qty, price * qty]
-      );
-    }
+  const productRes = await client.query(
+    "SELECT name FROM products WHERE id=$1",
+    [productId]
+  );
+
+  if (productRes.rowCount === 0) {
+    console.log("❌ PRODUCT NOT FOUND:", productId);
+    throw new Error("Product not found");
+  }
+
+  const productName = productRes.rows[0].name;
+
+  await client.query(
+    `INSERT INTO order_items (order_id, product_id, name, qty)
+     VALUES ($1,$2,$3,$4)`,
+    [order.id, productId, productName, qty]
+  );
+}
 
     await client.query("COMMIT");
 
     return res.status(201).json({
       message: "Order created",
       orderId: order.id,
-      total: order.total,
       status: order.status,
     });
-} catch (e) {
-  await client.query("ROLLBACK");
+  } catch (e) {
+    await client.query("ROLLBACK");
 
-  console.error("CREATE ORDER ERROR:", {
-    message: e?.message,
-    code: e?.code,
-    detail: e?.detail,
-    where: e?.where,
-    constraint: e?.constraint,
-  });
+    console.error("CREATE ORDER ERROR:", {
+      message: e?.message,
+      code: e?.code,
+      detail: e?.detail,
+      where: e?.where,
+      constraint: e?.constraint,
+    });
 
-  return res.status(500).json({
-    error: "Failed to create order",
-    details: e?.detail || e?.message || "Unknown server error",
-    code: e?.code || null,
-    constraint: e?.constraint || null,
-  });
-} finally {
-  client.release();
+    return res.status(500).json({
+      error: "Failed to create order",
+      details: e?.detail || e?.message || "Unknown server error",
+      code: e?.code || null,
+      constraint: e?.constraint || null,
+    });
+  } finally {
+    client.release();
+  }
 }
-}
+
 export async function getMyOrders(req, res) {
   const userId = req.user.id;
 
@@ -147,7 +178,10 @@ export async function markOrderPaid(req, res) {
   const { id } = req.params;
 
   const updated = await pool.query(
-    `UPDATE orders SET status='paid' WHERE id=$1 RETURNING *`,
+    `UPDATE orders
+     SET status='paid', updated_at=now()
+     WHERE id=$1
+     RETURNING *`,
     [id]
   );
 
