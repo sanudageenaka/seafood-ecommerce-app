@@ -99,10 +99,7 @@ export default function Home() {
       <section className="relative overflow-hidden bg-gradient-to-br from-sky-50 via-white to-cyan-50 border-b">
         <div className="max-w-7xl mx-auto px-6 py-20 md:py-24 grid md:grid-cols-2 gap-10 items-center">
           <div>
-            <p className="inline-block px-4 py-1 rounded-full bg-blue-100 text-blue-700 text-sm font-medium mb-5">
-              Fresh Seafood Delivered Daily
-            </p>
-
+            
             <h1 className="text-4xl md:text-6xl font-extrabold leading-tight">
               Premium seafood for your{" "}
               <span className="text-blue-600">perfect meal</span>
