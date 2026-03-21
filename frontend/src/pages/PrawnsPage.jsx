@@ -1,15 +1,16 @@
+
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
-// Products
+// Products (daily prices for display ONLY)
 const products = [
-  { id: 1, name: "Prawns", localName: "ISSO", price: 3600, image: "/seafoods/prawns1.jpg" },
-
+  { id: 10, name: "Prawns", localName: "ISSO", price: 3600, image: "/seafoods/prawns1.jpg" },
 ];
 
-export default function PrawnsPage() {
-  const { items, add, remove, clear, total } = useCart();
+export default function FishPage() {
+  // ✅ updated context values (NO total here)
+  const { items, add, remove, clear, totalKg } = useCart();
   const navigate = useNavigate();
 
   const [kgInputs, setKgInputs] = useState({});
@@ -21,11 +22,20 @@ export default function PrawnsPage() {
   const addKgToCart = (product) => {
     const kg = Number(kgInputs[product.id]) || 0;
     if (kg <= 0) return alert("Enter a valid kg.");
-    add(product, kg);
+
+    // ✅ DO NOT pass price into cart (daily price is display-only)
+    add(
+      {
+        id: product.id,
+        name: product.localName, // cart display name
+        scientificName: product.name, // optional
+        image: product.image,
+      },
+      kg
+    );
+
     setKgInputs((prev) => ({ ...prev, [product.id]: "" }));
   };
-
-  const totalKg = items.reduce((sum, i) => sum + i.qty, 0);
 
   const handleBuy = () => {
     if (items.length === 0) return alert("Cart is empty!");
@@ -47,10 +57,13 @@ export default function PrawnsPage() {
                 className="w-37 h-32 object-cover mb-3 rounded-lg mx-auto"
                 alt={p.name}
               />
+
               <p className="font-semibold text-center">{p.localName}</p>
               <h2 className="text-sm italic text-gray-600 text-center">{p.name}</h2>
+
+              {/* ✅ Daily price shown ONLY for information */}
               <p className="text-center font-bold text-green-700 mt-1">
-                LKR {p.price} / 1kg
+                LKR {Number(p.price).toLocaleString("en-LK")} / 1kg <span className="text-xs text-gray-500">(Today’s price)</span>
               </p>
 
               <input
@@ -76,7 +89,7 @@ export default function PrawnsPage() {
         </div>
       </div>
 
-      {/* CART (fixed position like your screenshot) */}
+      {/* CART */}
       <div className="lg:sticky lg:top-24 self-start space-y-4">
         <div className="bg-white p-5 rounded-xl shadow max-h-[calc(100vh-6rem)] flex flex-col">
           <h2 className="text-xl font-bold">🛒 Your Cart</h2>
@@ -91,9 +104,14 @@ export default function PrawnsPage() {
                   <li key={item.id} className="flex justify-between border-b py-2">
                     <div className="pr-3">
                       <p className="font-medium">{item.name}</p>
-                      <p className="text-sm text-gray-500">
-                        {item.qty}kg × LKR {item.price}
-                      </p>
+
+                      {/* ✅ Show only kg (NOT price) */}
+                      <p className="text-sm text-gray-500">{item.qty}kg</p>
+
+                      {/* optional */}
+                      {item.scientificName && (
+                        <p className="text-xs italic text-gray-400">{item.scientificName}</p>
+                      )}
                     </div>
 
                     <button
@@ -108,14 +126,18 @@ export default function PrawnsPage() {
             )}
           </div>
 
-          {/* Bottom fixed totals */}
-          <div className="mt-4 border-t pt-3 text-sm space-y-1">
-            <p>Total Weight: {totalKg}kg</p>
-            <p className="font-semibold">Total: LKR {total}</p>
+          {/* Bottom section */}
+          <div className="mt-4 border-t pt-3 text-sm space-y-2">
+            <p>Total Weight: <span className="font-semibold">{totalKg}kg</span></p>
+
+            {/* ✅ No total price here */}
+            <p className="text-xs text-gray-500">
+              Final total will be calculated using the fish price on the delivery date (2 days later).
+            </p>
 
             <button
               onClick={handleBuy}
-              className="w-full mt-3 bg-green-600 text-white py-2 rounded hover:bg-green-700"
+              className="w-full mt-2 bg-green-600 text-white py-2 rounded hover:bg-green-700"
             >
               Buy Now
             </button>
